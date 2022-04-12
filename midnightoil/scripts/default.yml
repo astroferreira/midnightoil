@@ -1,0 +1,31 @@
+basePath: /home/ppxlf2/sources/midnightoil
+trainingPlan:
+    runName: 'teste'
+    epochs: 400
+    initialEpoch: 0
+    batchSize: 256
+    dataPath: /home/ppxlf2/data/SDSS2/
+    tfrecordsColumns: ['N_major_mergers_aug']
+    classification: false
+
+learningRateScheduler:
+    scheduler: WarmUpCosine
+    warmupSteps: 7780
+    cycleSteps: 389000
+    lowerLR: 1.0e-4
+    upperLR: 1.0e-2
+
+modelName: 'SwinTransformer'
+model:
+    numOutputs: 1
+    dims: [8, 16, 32]
+    depths: [3, 11, 3]
+    inputShape: [64, 64, 3]
+    stemUndersample: 2
+    layerNormalizationEpsilon: 1.0e-6
+    dropPathRate: 0.1
+    layerScaleInitValue: 1.0e-6
+
+metrics: ['categorical_accuracy']
+optimizer: NesterovSGD
+loss: 'categorical_crossentropy'

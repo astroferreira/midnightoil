@@ -1,0 +1,30 @@
+basePath: /home/ppxlf2/sources/midnightoil
+trainingPlan:
+    runName: 'teste'
+    epochs: 200
+    batchSize: 32
+    dataPath: /home/ppxlf2/data/SDSS
+    tfrecordsColumns: ['N_major_mergers_aug']
+    classification: false
+
+learningRateScheduler:
+    scheduler: WarmUpCosine
+    warmupSteps: 20
+    cycleSteps: 50
+    lowerLR: 1e-4
+    upperLR: 1e-3
+
+modelName: 'MergeNeXt'
+model:
+    numOutputs: 2
+    dims: [64, 128, 256]
+    depths: [4, 4, 4]
+    inputShape: [64, 64, 3]
+    stemUndersample: 2
+    layerNormalizationEpsilon: 1.0e-6
+    dropPathRate: 0.3
+    layerScaleInitValue: 1.0e-6
+
+metrics: ['MAE', 'MSE']
+optimizer: NesterovSGD
+loss: MAE
