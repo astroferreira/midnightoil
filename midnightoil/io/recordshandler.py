@@ -40,7 +40,10 @@ def parse(image_feature_description, columns, with_labels=True, with_rootnames=F
         labels = []
         for col in columns:
             if col == 'N_major_mergers_aug':
-                labels = tf.one_hot(tf.cast(example[col], tf.uint8), depth=3)
+                if len(columns) > 1:
+                    labels.append(tf.one_hot(tf.cast(example[col], tf.uint8), depth=3))
+                else:
+                    labels = tf.one_hot(tf.cast(example[col], tf.uint8), depth=3)
                 #labels.append(one_hot)
             else:
                 labels.append(example[col])

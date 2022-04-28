@@ -4,12 +4,13 @@ import numpy as np
 
 def batch_mosaic(X):
 
-    f, axs = plt.subplots(5, 5, figsize=(10.5, 10.7))
+    f, axs = plt.subplots(5, 5, figsize=(10.5, 10.7), dpi=150)
+    
 
 
     for im, ax in zip(X, axs.flat):
 
-        norm = np.log10(10**im.numpy().copy())
+        norm = np.sqrt(10**im.numpy().copy())
 
 
         for i in range(3):

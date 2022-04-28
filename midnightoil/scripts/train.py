@@ -61,9 +61,13 @@ if args.eval:
 
     preds = []
     trues = []
-    for ex in tPlanner.test_dataset:
+    tPlanner.loadData(training=False)
+    for i, ex in enumerate(tPlanner.test_dataset):
+        
         X = ex[0]
         y = ex[1]
+
+        print(i)
         preds.append(tPlanner.model(X))
         trues.append(y)
     

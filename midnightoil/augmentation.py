@@ -4,6 +4,8 @@ import numpy as np
 import math
 from typing import Tuple
 
+RNG = tf.random.Generator.from_seed(1331)
+
 def flip(x: tf.Tensor, y: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor]:
     """Flip augmentation
 
@@ -31,8 +33,23 @@ def color(x, y):
     x = tf.image.random_contrast(x, 0.7, 1.3)
     return x, y
 
-def oclusion(x, y, size=16):
-    return tfa.image.random_cutout(x, (size, size), constant_values=1), y
+def oclusion(x, y, size=32):
+    x = tf.expand_dims(x, axis=0)
+    return tf.squeeze(tfa.image.random_cutout(x, (size, size), constant_values=0)), y
+
+def central_crop(x, y):
+    x = tf.image.central_crop(x, central_fraction=RNG.uniform((1,), 0.5, 0.95)[0])
+    x = tf.cast(tf.image.resize(x, (128, 128)), dtype=tf.float64)
+    return x, y
+
+
+def shear_x(x, y):
+    x = tfa.image.shear_x(x, level=RNG.uniform([], -0.2, 0.2), replace=0)
+    return x, y
+
+def shear_y(x, y):
+    x = tfa.image.shear_y(x, level=RNG.uniform([], -0.2, 0.2), replace=0)
+    return x, y
 
 def small_rot(x, y):
     rot = np.random.uniform(0, 30)
@@ -42,7 +59,7 @@ def small_rot(x, y):
     image = tf.image.resize(resized_image, [128, 128], method=tf.image.ResizeMethod.BILINEAR)
     return tf.cast(image, dtype=tf.float64), y
 
-def rotate(x, y):
+def rotate90(x, y):
     """Rotation augmentation
 
     Args:
@@ -53,6 +70,11 @@ def rotate(x, y):
     """
     return tf.image.rot90(x, tf.random.uniform(shape=[], minval=0, maxval=4, dtype=tf.int32)), y
 
+
+def rotate(x, y):
+    x = tf.keras.layers.experimental.preprocessing.RandomRotation(factor=(-0.5, 0.5))(x)
+    x = tf.cast(x, dtype=tf.float64)
+    return x, y
 def zoom(x, y):
     """Zoom augmentation
 

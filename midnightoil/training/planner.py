@@ -44,7 +44,7 @@ class TrainingPlanner:
         
 
         self.loadModel()
-        self.loadData()
+        #self.loadData()
         
 
 
@@ -64,22 +64,24 @@ class TrainingPlanner:
         
 
 
-    def loadData(self):
-        
-        self.training_dataset = load_dataset(f'{self.dataPath}/train/train*.tfrecords',
-                                             training=True,
-                                             columns=self.columns,
-                                             batch_size=self.batchSize)
-        
-        self.test_dataset = load_dataset(f'{self.dataPath}/val/val*.tfrecords',
-                                            columns=self.columns,
-                                            batch_size=self.batchSize, shuffle=False, augmentations=[])
-
+    def loadData(self, training=True):
         
         ignore_order = tf.data.Options()
         ignore_order.experimental_deterministic = False
         
-        self.training_dataset = self.training_dataset.with_options(ignore_order) 
+        if training:
+            self.training_dataset = load_dataset(f'{self.dataPath}/train/train*.tfrecords',
+                                                epochs=(self.epochs-self.initialEpoch),
+                                                columns=self.columns,
+                                                training=training,
+                                                batch_size=self.batchSize)
+        
+            self.training_dataset = self.training_dataset.with_options(ignore_order) 
+
+        self.test_dataset = load_dataset(f'{self.dataPath}/val/val*.tfrecords',
+                                            columns=self.columns, training=False,
+                                            batch_size=self.batchSize, augmentations=[])
+        
         self.test_dataset = self.test_dataset.with_options(ignore_order)
 
 
@@ -89,7 +91,8 @@ class TrainingPlanner:
                                     validation_data=self.test_dataset,
                                     epochs=self.epochs,
                                     initial_epoch=self.initialEpoch,
-                                    steps_per_epoch=99648/self.batchSize,
+                                    steps_per_epoch=99648//self.batchSize,
+                                    validation_steps=21504//self.batchSize,
                                     callbacks=self.callbacks)
 
         
