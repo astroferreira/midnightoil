@@ -1,32 +1,45 @@
-[I 2022-03-30 20:21:56.789 ServerApp] jupyterlab | extension was successfully linked.
-[W 2022-03-30 20:21:56.813 NotebookApp] 'password' has moved from NotebookApp to ServerApp. This config will be passed to ServerApp. Be sure to update your config before our next release.
-[I 2022-03-30 20:21:56.826 ServerApp] nbclassic | extension was successfully linked.
-[I 2022-03-30 20:21:58.881 ServerApp] notebook_shim | extension was successfully linked.
-[I 2022-03-30 20:21:59.063 ServerApp] notebook_shim | extension was successfully loaded.
-[I 2022-03-30 20:21:59.065 LabApp] JupyterLab extension loaded from /home/ppxlf2/anaconda3/envs/deep/lib/python3.8/site-packages/jupyterlab
-[I 2022-03-30 20:21:59.065 LabApp] JupyterLab application directory is /home/ppxlf2/anaconda3/envs/deep/share/jupyter/lab
-[I 2022-03-30 20:21:59.070 ServerApp] jupyterlab | extension was successfully loaded.
-[I 2022-03-30 20:21:59.097 ServerApp] nbclassic | extension was successfully loaded.
-[I 2022-03-30 20:21:59.098 ServerApp] Serving notebooks from local directory: /home/ppxlf2/mergenet
-[I 2022-03-30 20:21:59.098 ServerApp] Jupyter Server 1.15.6 is running at:
-[I 2022-03-30 20:21:59.098 ServerApp] http://mlis2:7000/lab
-[I 2022-03-30 20:21:59.098 ServerApp]  or http://127.0.0.1:7000/lab
-[I 2022-03-30 20:21:59.098 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
-[W 2022-03-30 20:21:59.110 ServerApp] No web browser found: could not locate runnable browser.
-[I 2022-03-30 20:22:26.506 ServerApp] 302 GET / (127.0.0.1) 0.52ms
-[W 2022-03-30 20:22:33.097 LabApp] Could not determine jupyterlab build status without nodejs
-[W 2022-03-30 20:22:34.160 ServerApp] 404 GET /api/contents/notebooks/PLOTS_PAPER/TESTES.ipynb?content=0&1648668154061 (127.0.0.1): No such file or directory: notebooks/PLOTS_PAPER/TESTES.ipynb
-[W 2022-03-30 20:22:34.160 ServerApp] No such file or directory: notebooks/PLOTS_PAPER/TESTES.ipynb
-[W 2022-03-30 20:22:34.161 ServerApp] 404 GET /api/contents/notebooks/PLOTS_PAPER/TESTES.ipynb?content=0&1648668154061 (127.0.0.1) 3.57ms referer=http://localhost:7000/lab?
-[I 2022-03-30 20:22:34.288 ServerApp] New terminal with automatic name: 1
-TermSocket.open: 1
-TermSocket.open: Opened 1
-[W 2022-03-30 20:22:35.360 ServerApp] 404 GET /api/contents/notebooks/PLOTS_PAPER?1648668155340 (127.0.0.1): No such file or directory: notebooks/PLOTS_PAPER
-[W 2022-03-30 20:22:35.360 ServerApp] No such file or directory: notebooks/PLOTS_PAPER
-[W 2022-03-30 20:22:35.361 ServerApp] 404 GET /api/contents/notebooks/PLOTS_PAPER?1648668155340 (127.0.0.1) 2.84ms referer=http://localhost:7000/lab?
-[C 2022-03-30 20:23:12.096 ServerApp] received signal 15, stopping
-[I 2022-03-30 20:23:12.098 ServerApp] Shutting down 3 extensions
-[I 2022-03-30 20:23:12.098 ServerApp] Shutting down 0 kernels
-[I 2022-03-30 20:23:12.099 ServerApp] Shutting down 1 terminal
-[I 2022-03-30 20:23:12.099 ServerApp] EOF on FD 18; stopping reading
-[I 2022-03-30 20:23:12.200 ServerApp] Terminal 1 closed
+nohup: ignoring input
+[I 2022-05-17 22:00:27.596 ServerApp] jupyterlab | extension was successfully linked.
+[I 2022-05-17 22:00:27.609 ServerApp] nbclassic | extension was successfully linked.
+[I 2022-05-17 22:00:27.950 ServerApp] notebook_shim | extension was successfully linked.
+[I 2022-05-17 22:00:28.040 ServerApp] notebook_shim | extension was successfully loaded.
+[I 2022-05-17 22:00:28.042 LabApp] JupyterLab extension loaded from /home/ppxlf2/.conda/envs/astroSTN/lib/python3.8/site-packages/jupyterlab
+[I 2022-05-17 22:00:28.042 LabApp] JupyterLab application directory is /home/ppxlf2/.conda/envs/astroSTN/share/jupyter/lab
+[I 2022-05-17 22:00:28.047 ServerApp] jupyterlab | extension was successfully loaded.
+[I 2022-05-17 22:00:28.052 ServerApp] nbclassic | extension was successfully loaded.
+[I 2022-05-17 22:00:28.052 ServerApp] The port 7979 is already in use, trying another port.
+[I 2022-05-17 22:00:28.053 ServerApp] The port 7980 is already in use, trying another port.
+[I 2022-05-17 22:00:28.053 ServerApp] Serving notebooks from local directory: /home/ppxlf2/sources/midnightoil
+[I 2022-05-17 22:00:28.053 ServerApp] Jupyter Server 1.17.0 is running at:
+[I 2022-05-17 22:00:28.053 ServerApp] http://capt-gpu:7981/lab?token=773485a4b7a0566020d10a82fbbc1abde9e88741788ae713
+[I 2022-05-17 22:00:28.053 ServerApp]  or http://127.0.0.1:7981/lab?token=773485a4b7a0566020d10a82fbbc1abde9e88741788ae713
+[I 2022-05-17 22:00:28.053 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 2022-05-17 22:00:28.058 ServerApp] 
+    
+    To access the server, open this file in a browser:
+        file:///home/ppxlf2/.local/share/jupyter/runtime/jpserver-29830-open.html
+    Or copy and paste one of these URLs:
+        http://capt-gpu:7981/lab?token=773485a4b7a0566020d10a82fbbc1abde9e88741788ae713
+     or http://127.0.0.1:7981/lab?token=773485a4b7a0566020d10a82fbbc1abde9e88741788ae713
+[I 2022-05-17 22:02:02.912 LabApp] 302 GET /lab? (127.0.0.1) 1.34ms
+[I 2022-05-17 22:02:14.106 ServerApp] 302 POST /login?next=%2Flab%3F (127.0.0.1) 1.58ms
+[W 2022-05-17 22:02:20.322 LabApp] Could not determine jupyterlab build status without nodejs
+[W 2022-05-17 22:02:25.037 ServerApp] 404 GET /api/contents/sources/midnightoil/runs/095_202205130132/time_since_mergers_refined.png?content=0&1652821344933 (127.0.0.1): No such file or directory: sources/midnightoil/runs/095_202205130132/time_since_mergers_refined.png
+[W 2022-05-17 22:02:25.038 ServerApp] No such file or directory: sources/midnightoil/runs/095_202205130132/time_since_mergers_refined.png
+[W 2022-05-17 22:02:25.039 ServerApp] 404 GET /api/contents/sources/midnightoil/runs/095_202205130132/time_since_mergers_refined.png?content=0&1652821344933 (127.0.0.1) 3.99ms referer=http://localhost:7981/lab?
+[W 2022-05-17 22:02:25.040 ServerApp] 404 GET /api/contents/sources/midnightoil/runs/110_202205140537/Untitled.ipynb?content=0&1652821344935 (127.0.0.1): No such file or directory: sources/midnightoil/runs/110_202205140537/Untitled.ipynb
+[W 2022-05-17 22:02:25.040 ServerApp] No such file or directory: sources/midnightoil/runs/110_202205140537/Untitled.ipynb
+[W 2022-05-17 22:02:25.041 ServerApp] 404 GET /api/contents/sources/midnightoil/runs/110_202205140537/Untitled.ipynb?content=0&1652821344935 (127.0.0.1) 4.93ms referer=http://localhost:7981/lab?
+[W 2022-05-17 22:02:25.064 ServerApp] 404 GET /api/contents/sources/midnightoil/Untitled.ipynb?content=0&1652821344937 (127.0.0.1): No such file or directory: sources/midnightoil/Untitled.ipynb
+[W 2022-05-17 22:02:25.064 ServerApp] No such file or directory: sources/midnightoil/Untitled.ipynb
+[W 2022-05-17 22:02:25.064 ServerApp] 404 GET /api/contents/sources/midnightoil/Untitled.ipynb?content=0&1652821344937 (127.0.0.1) 5.75ms referer=http://localhost:7981/lab?
+[W 2022-05-17 22:02:25.733 ServerApp] 404 GET /api/contents/sources/midnightoil?1652821345660 (127.0.0.1): No such file or directory: sources/midnightoil
+[W 2022-05-17 22:02:25.733 ServerApp] No such file or directory: sources/midnightoil
+[W 2022-05-17 22:02:25.734 ServerApp] 404 GET /api/contents/sources/midnightoil?1652821345660 (127.0.0.1) 6.99ms referer=http://localhost:7981/lab?
+[I 2022-05-17 22:03:00.291 ServerApp] Creating new notebook in /runs/142_202205161914
+[W 2022-05-17 22:03:05.352 ServerApp] The signatures database cannot be opened; maybe it is corrupted or encrypted. You may need to rerun your notebooks to ensure that they are trusted to run Javascript. The old signatures database has been renamed to /home/ppxlf2/.local/share/jupyter/nbsignatures.db.bak and a new one has been created.
+[C 2022-05-17 22:28:59.949 ServerApp] received signal 15, stopping
+[W 2022-05-17 22:28:59.951 ServerApp] Failed commiting signatures database to disk. You may need to move the database file to a non-networked file system, using config option `NotebookNotary.db_file`. Using in-memory signatures database for the remainder of this session.
+[I 2022-05-17 22:29:07.085 ServerApp] Shutting down 3 extensions
+[I 2022-05-17 22:29:07.096 ServerApp] Shutting down 0 kernels
+[I 2022-05-17 22:29:07.096 ServerApp] Shutting down 0 terminals

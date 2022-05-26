@@ -32,12 +32,13 @@ runPath = f"{config['basePath']}/runs/{current_run}/"
 
 csv_logger = CSVLogger(f"{runPath}/training.csv", append=True, separator=';')
 logDir = f"{config['basePath']}/logs/scalars/{current_run}"
-tensorboard_callback = keras.callbacks.TensorBoard(log_dir=logDir)
-checkpoint_callback = ModelCheckpoint(f'{runPath}/checkpoints/' + '{val_loss:.4}_{epoch:03d}.ckpt', 'val_loss', mode='min', save_weights_only=True)
+#tensorboard_callback = keras.callbacks.TensorBoard(log_dir=logDir)
+checkpoint_callback = ModelCheckpoint(f'{runPath}/checkpoints/' + '{val_categorical_accuracy:.4}_{epoch:03d}.ckpt', 'val_categorical_accuracy', mode='max', save_best_only=True, save_weights_only=True)
 
-tPlanner = TrainingPlanner(config, currentRun=current_run, callbacks=[tensorboard_callback, checkpoint_callback, csv_logger])
 
 if args.eval:
+    config['trainingPlan']['epochs'] = 1
+    tPlanner = TrainingPlanner(config, currentRun=current_run, callbacks=[checkpoint_callback, csv_logger])
     checkpoint_dir = f'{runPath}/checkpoints/'
 
     if args.from_epoch == 0:
@@ -57,18 +58,17 @@ if args.eval:
  
     print(latest)
     logger.info(f'Loading weights from {latest}')
-    tPlanner.model.load_weights(latest)
+    tPlanner.model.load_weights(latest).expect_partial()
 
     preds = []
     trues = []
-    tPlanner.loadData(training=False)
+    tPlanner.loadData(training=False, batchSize=128)
     for i, ex in enumerate(tPlanner.test_dataset):
         
         X = ex[0]
         y = ex[1]
-
-        print(i)
-        preds.append(tPlanner.model(X))
+        
+        preds.append(tPlanner.model.predict(X))
         trues.append(y)
     
     preds = np.array(np.concatenate(preds))
@@ -112,14 +112,20 @@ if args.resume_run is not None:
             last_loss, epoch = latest.split('/')[-1].split('_')
             epoch = int(epoch.split('.')[0])
 
-        
+    #config['trainingPlan']
+    tPlanner = TrainingPlanner(config, currentRun=current_run, callbacks=[checkpoint_callback, csv_logger])    
     logger.info(f'Loading weights from {latest}')
     tPlanner.model.load_weights(latest)
     tPlanner.initialEpoch = epoch
     tPlanner.epochs = epoch+200
+    tPlanner.loadData(training=True)
+    
     
     tPlanner.train()
 else:    
-    tPlanner.model.summary(expand_nested=True)
+    tPlanner = TrainingPlanner(config, currentRun=current_run, callbacks=[checkpoint_callback, csv_logger])
+    tPlanner.model.summary()
+    tPlanner.loadData(training=True)
+
     tPlanner.train()
 

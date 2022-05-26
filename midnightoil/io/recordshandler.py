@@ -33,9 +33,8 @@ def parse(image_feature_description, columns, with_labels=True, with_rootnames=F
 
         example = tf.io.parse_single_example(ep, image_feature_description)
         image = tf.io.decode_raw(example['X'], out_type=np.float64)
-        image = tf.reshape(image, (128, 128, 3))
-        #image = tf.image.resize(image, (224, 224))
-
+        image = tf.reshape(image, (64, 64, 3))
+        
 
         labels = []
         for col in columns:
@@ -44,9 +43,9 @@ def parse(image_feature_description, columns, with_labels=True, with_rootnames=F
                     labels.append(tf.one_hot(tf.cast(example[col], tf.uint8), depth=3))
                 else:
                     labels = tf.one_hot(tf.cast(example[col], tf.uint8), depth=3)
-                #labels.append(one_hot)
+               
             else:
-                labels.append(example[col])
+                labels =  example[col]#tf.where(tf.math.is_nan(example[col]), tf.zeros_like(example[col]), example[col])
                           
         if with_labels:
             if with_rootnames:

@@ -5,7 +5,7 @@ import tensorflow as tf
 from tensorflow.keras import mixed_precision
 
 
-
+from focal_loss import SparseCategoricalFocalLoss 
 
 from ..models import loader
 from ..schedulers import load_scheduler
@@ -14,7 +14,6 @@ from ..metrics import lr_metric
 from ..io.dataset import load_dataset
 
 class TrainingPlanner:
-
 
     def __init__(self, config=None, currentRun=None, callbacks=[]):
 
@@ -36,39 +35,49 @@ class TrainingPlanner:
         self.batchSize  = self.configTraining['batchSize']
         self.dataPath  = self.configTraining['dataPath']
         self.columns = self.configTraining['tfrecordsColumns']
-        self.classification = self.configTraining['classification']
+        self.classification = self.config['model']['classification']
         self.modelName = self.config['modelName']
         self.loss = self.config['loss']
         self.metrics = self.config['metrics']
-        
-        
-
-        self.loadModel()
-        #self.loadData()
-        
-
-
-    def loadModel(self):
-        self.strategy = tf.distribute.MirroredStrategy()
-        print("Number of devices: {}".format(self.strategy.num_replicas_in_sync))
         self.configScheduler = self.config['learningRateScheduler']
 
-        tf.keras.mixed_precision.set_global_policy('mixed_float16')
+        if self.configTraining['distributed']:
+            self.loadModelDistributed()
+        else:
+            self.loadModel()
+    
+
+    def loadModelDistributed(self):
+    
+        self.strategy = tf.distribute.MirroredStrategy()
+        print("Number of devices: {}".format(self.strategy.num_replicas_in_sync))
+    
+
         with self.strategy.scope():
             self.model = loader.get_model(self.modelName, self.config['model'], self.classification)
             self.scheduled_lrs = load_scheduler(self.configScheduler['scheduler'], self.configScheduler)
             self.optimizer = load_optimizer(self.config['optimizer'], self.scheduled_lrs)
             self.metrics.append(lr_metric(self.optimizer))
             self.model.compile(optimizer=self.optimizer, loss=self.loss,
-                               metrics=self.metrics)
+                            metrics=self.metrics)
+            
+
+    def loadModel(self):
+
+        self.model = loader.get_model(self.modelName, self.config['model'], self.classification)
+        self.scheduled_lrs = load_scheduler(self.configScheduler['scheduler'], self.configScheduler)
+        self.optimizer = load_optimizer(self.config['optimizer'], self.scheduled_lrs)
+        self.metrics.append(lr_metric(self.optimizer))
+        self.model.compile(optimizer=self.optimizer, loss=self.loss,
+                        metrics=self.metrics)
+
         
 
-
-    def loadData(self, training=True):
+    def loadData(self, training=True, batchSize=None):
         
         ignore_order = tf.data.Options()
         ignore_order.experimental_deterministic = False
-        
+        print(f'EPOCHS = {self.epochs}')
         if training:
             self.training_dataset = load_dataset(f'{self.dataPath}/train/train*.tfrecords',
                                                 epochs=(self.epochs-self.initialEpoch),
@@ -78,9 +87,13 @@ class TrainingPlanner:
         
             self.training_dataset = self.training_dataset.with_options(ignore_order) 
 
-        self.test_dataset = load_dataset(f'{self.dataPath}/val/val*.tfrecords',
+        
+        if batchSize is None:
+            batchSize = self.batchSize
+
+        self.test_dataset = load_dataset(f'{self.dataPath}/val/val*.tfrecords', epochs=self.epochs,
                                             columns=self.columns, training=False,
-                                            batch_size=self.batchSize, augmentations=[])
+                                            batch_size=batchSize, augmentations=[])
         
         self.test_dataset = self.test_dataset.with_options(ignore_order)
 
@@ -91,8 +104,8 @@ class TrainingPlanner:
                                     validation_data=self.test_dataset,
                                     epochs=self.epochs,
                                     initial_epoch=self.initialEpoch,
-                                    steps_per_epoch=99648//self.batchSize,
-                                    validation_steps=21504//self.batchSize,
+                                    steps_per_epoch=99660//self.batchSize,
+                                    validation_steps=21489//self.batchSize,
                                     callbacks=self.callbacks)
 
         

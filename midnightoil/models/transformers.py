@@ -3,7 +3,9 @@ import tensorflow as tf
 from tensorflow.keras.layers import Dense, Dropout, Conv2D, LayerNormalization, GlobalAveragePooling1D
 
 CFGS = {
-    'swin_tiny_128': dict(input_size=(128, 128), window_size=8, embed_dim=30, depths=[2, 2, 6, 2], num_heads=[1, 3, 6, 12]),
+    'swin_large': dict(input_size=(64, 64), window_size=8, embed_dim=96, depths=[2, 2, 18, 2], num_heads=[3, 6, 12, 24]),
+    'swin_tiny_128': dict(input_size=(64, 64), window_size=4, embed_dim=30, depths=[2, 2, 6, 2], num_heads=[1, 3, 6, 12]),
+    'swin_large_64': dict(input_size=(64, 64), window_size=4, embed_dim=60, depths=[2, 2, 18, 2], num_heads=[3, 6, 12, 24]),
     'swin_tiny_224': dict(input_size=(224, 224), window_size=7, embed_dim=96, depths=[2, 2, 6, 2], num_heads=[3, 6, 12, 24]),
     'swin_small_224': dict(input_size=(224, 224), window_size=7, embed_dim=96, depths=[2, 2, 18, 2], num_heads=[3, 6, 12, 24]),
     'swin_base_224': dict(input_size=(224, 224), window_size=7, embed_dim=128, depths=[2, 2, 18, 2], num_heads=[4, 8, 16, 32]),
@@ -129,7 +131,7 @@ def drop_path(inputs, drop_prob, is_training):
     # Compute drop_connect tensor
     random_tensor = keep_prob
     shape = (tf.shape(inputs)[0],) + (1,) * \
-        (len(tf.shape(inputs)) - 1)
+        (len(inputs.shape.as_list()) - 1)
     random_tensor += tf.random.uniform(shape, dtype=inputs.dtype)
     binary_tensor = tf.floor(random_tensor)
     output = tf.math.divide(inputs, keep_prob) * binary_tensor
@@ -351,7 +353,7 @@ class SwinTransformerModel(tf.keras.Model):
                  window_size=7, mlp_ratio=4., qkv_bias=True, qk_scale=None,
                  drop_rate=0., attn_drop_rate=0., drop_path_rate=0.1,
                  norm_layer=LayerNormalization, ape=False, patch_norm=True,
-                 use_checkpoint=False, **kwargs):
+                 use_checkpoint=False, classification=True, **kwargN_major_mergers_augs):
         super().__init__(name=model_name)
 
         self.include_top = include_top
@@ -363,6 +365,7 @@ class SwinTransformerModel(tf.keras.Model):
         self.patch_norm = patch_norm
         self.num_features = int(embed_dim * 2 ** (self.num_layers - 1))
         self.mlp_ratio = mlp_ratio
+        self.classification = classification
 
         # split image into non-overlapping patches
         self.patch_embed = PatchEmbed(
@@ -404,7 +407,10 @@ class SwinTransformerModel(tf.keras.Model):
         self.norm = norm_layer(epsilon=1e-5, name='norm')
         self.avgpool = GlobalAveragePooling1D()
         if self.include_top:
-            self.head = Dense(num_classes, activation='softmax', name='head')
+            if self.classification:
+                self.head = Dense(num_classes, activation='sigmoid', name='head')
+            else:
+                self.head = Dense(num_classes, activation='linear', name='head')
         else:
             self.head = None
 
@@ -426,11 +432,12 @@ class SwinTransformerModel(tf.keras.Model):
         return x
 
 
-def SwinTransformer(config, model_name='swin_tiny_128', num_classes=3, include_top=True, pretrained=False, use_tpu=False, cfgs=CFGS, classification=None):
-    cfg = cfgs[model_name]
+def SwinTransformer(cfg, model_name='swin_tiny_128', num_classes=1, include_top=True, pretrained=False, use_tpu=False, cfgs=CFGS, classification=None):
+    #cfg = from_config_file(config['model'])
     net = SwinTransformerModel(
-        model_name=model_name, include_top=include_top, num_classes=num_classes, img_size=cfg['input_size'], window_size=cfg[
-            'window_size'], embed_dim=cfg['embed_dim'], depths=cfg['depths'], num_heads=cfg['num_heads']
+        model_name=model_name, include_top=include_top, num_classes=cfg['num_classes'], img_size=cfg['input_size'], window_size=cfg[
+            'window_size'], embed_dim=cfg['embed_dim'], depths=cfg['depths'], num_heads=cfg['num_heads'],
+            classification=cfg['classification']
     )
     net(tf.keras.Input(shape=(cfg['input_size'][0], cfg['input_size'][1], 3)))
     if pretrained is True:
@@ -452,3 +459,9 @@ def SwinTransformer(config, model_name='swin_tiny_128', num_classes=3, include_t
             net.load_weights(pretrained_ckpt)
 
     return net
+
+
+def from_config_file(cfg):
+    return dict(input_size=cfg['inputShape'], window_size=cfg['window_size'],
+                embed_dim=cfg['embed_dim'], depths=cfg['depths'], 
+                num_heads=cfg['num_heads'])

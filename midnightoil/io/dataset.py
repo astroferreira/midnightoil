@@ -4,45 +4,43 @@ import numpy as np
 import math
 
 from .recordshandler import construct_feature_description, parse
-from ..augmentation import flip, rotate, rotate90, oclusion, color, central_crop, shear_x, shear_y
+from ..augmentation import flip, rotate, rotate90, oclusion, color, central_crop, shear_x, shear_y,small_rot
 
 import glob
 
 RNG = tf.random.Generator.from_seed(1331)
 
-def load_dataset(path, columns=['y'], epochs=400, 
+def load_dataset(path, epochs, columns=['y'],
                  training=False, batch_size=128, 
-                 buffer_size=18000, augmentations=[rotate90, flip, rotate, central_crop, shear_x, shear_y, oclusion], 
-                 probs=[0.5, 0.5, 0.5, 0.4, 0.0,  0.0, 0.8]):
+                 buffer_size=18000, augmentations=[flip, rotate90, rotate,  shear_x, shear_y, oclusion], 
+                 probs=[0.5, 0.5, 0.8, 0.6, 0.6, 0.7]):
     
 
     files = sorted(glob.glob(path))[0]
-    print(files)
     dataset = tf.data.TFRecordDataset(files)
     image_feature_description = construct_feature_description(dataset)
     map_function = parse(image_feature_description, columns=columns, with_labels=True)
-    print(image_feature_description)
-    files = sorted(glob.glob(path))
-    dataset = tf.data.TFRecordDataset(files)
+
+    files = glob.glob(path)
+    files.sort(key=natural_keys)
+
+    dataset = tf.data.TFRecordDataset(files, num_parallel_reads=tf.data.AUTOTUNE)
     dataset = dataset.map(map_function)
+    dataset = dataset.batch(batch_size, drop_remainder=True)
     
     if training:
         dataset = dataset.shuffle(batch_size, reshuffle_each_iteration=True)
 
         for f, ps in zip(augmentations, probs):
-            if ps == 0.0:
-                continue
             
-            dataset = dataset.map(lambda x, y: tf.cond(RNG.uniform((1,), 0, 1) <= ps, lambda: f(x, y), lambda: (x, y)),
+            dataset = dataset.map(lambda x, y: tf.cond(tf.less(RNG.uniform((1,), 0, 1), ps), lambda: f(x, y), lambda: (x, y)),
                                   num_parallel_calls=tf.data.AUTOTUNE)
     
-    
-        dataset = dataset.batch(batch_size, drop_remainder=True)
-        dataset = dataset.repeat(epochs)
-    else:
-        dataset = dataset.batch(128, drop_remainder=True)
+        dataset.cache()
+        
+    dataset = dataset.repeat(epochs)
 
-    #dataset = dataset.prefetch(buffer_size=64)#.cache(filename='cached.cc')
+    dataset = dataset.prefetch(buffer_size=8)
 
     return dataset
 
@@ -69,4 +67,15 @@ def unravel_dataset(dataset, model, batch_size, ncolumns=3):
         
     return X, y#, rootnames
 
+import re
+def natural_keys(text):
+    '''
+    alist.sort(key=natural_keys) sorts in human order
+    http://nedbatchelder.com/blog/200712/human_sorting.html
+    (See Toothy's implementation in the comments)
+    '''
+    c = re.split('_', text)[-1].split('-')[0]
+    return atoi(c)
 
+def atoi(text):
+    return int(text) if text.isdigit() else text

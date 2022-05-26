@@ -35,9 +35,7 @@ def handle_args():
     args = parser.parse_args(sys.argv[1:])
 
     
-    config = yaml.safe_load(open(args.config))
-
-    
+    config = yaml.safe_load(open(args.config)) 
 
     os.environ["CUDA_VISIBLE_DEVICES"] = args.GPUS
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = args.tf_log_level

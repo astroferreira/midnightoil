@@ -3,8 +3,8 @@ trainingPlan:
     runName: 'teste'
     epochs: 200
     batchSize: 32
-    dataPath: /home/ppxlf2/data/SDSS
-    tfrecordsColumns: ['N_major_mergers_aug']
+    dataPath: /home/ppxlf2/data/data_dtime
+    tfrecordsColumns: ['most_recent_major_dTime_log']
     classification: false
 
 learningRateScheduler:

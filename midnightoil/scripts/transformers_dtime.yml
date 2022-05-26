@@ -1,12 +1,13 @@
 basePath: /home/ppxlf2/sources/midnightoil
 trainingPlan:
     runName: 'ViT'
-    epochs: 400
+    epochs: 1000
     initialEpoch: 0
     batchSize: 128
-    dataPath: /home/ppxlf2/data/data_dtimev2/
-    tfrecordsColumns: ['most_recent_major_dTime_log']
+    dataPath: /home/ppxlf2/data/data_dtimev4/
+    tfrecordsColumns: ['most_recent_major_dTime_aug_log']
     classification: false
+    distributed: false
 
 learningRateScheduler:
     scheduler: WarmUpCosine
@@ -17,14 +18,13 @@ learningRateScheduler:
 
 modelName: 'SwinTransformer'
 model:
-    numOutputs: 1
-    dims: [8, 16, 32]
-    depths: [3, 11, 3]
-    inputShape: [64, 64, 3]
-    stemUndersample: 2
-    layerNormalizationEpsilon: 1.0e-6
-    dropPathRate: 0.1
-    layerScaleInitValue: 1.0e-6
+    num_classes: 1
+    embed_dim: 90
+    window_size: 8
+    depths: [2, 2, 6, 2]
+    input_size: [64, 64]
+    num_heads: [1, 3, 6, 12]
+    classification: false
 
 metrics: ['MSE', 'MAE']
 optimizer: NesterovSGD
