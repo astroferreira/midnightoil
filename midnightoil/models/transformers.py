@@ -353,7 +353,7 @@ class SwinTransformerModel(tf.keras.Model):
                  window_size=7, mlp_ratio=4., qkv_bias=True, qk_scale=None,
                  drop_rate=0., attn_drop_rate=0., drop_path_rate=0.1,
                  norm_layer=LayerNormalization, ape=False, patch_norm=True,
-                 use_checkpoint=False, classification=True, **kwargN_major_mergers_augs):
+                 use_checkpoint=False, classification=True, **kwargs):
         super().__init__(name=model_name)
 
         self.include_top = include_top
@@ -408,7 +408,7 @@ class SwinTransformerModel(tf.keras.Model):
         self.avgpool = GlobalAveragePooling1D()
         if self.include_top:
             if self.classification:
-                self.head = Dense(num_classes, activation='sigmoid', name='head')
+                self.head = Dense(num_classes, activation='softmax', name='head')
             else:
                 self.head = Dense(num_classes, activation='linear', name='head')
         else:
@@ -432,31 +432,21 @@ class SwinTransformerModel(tf.keras.Model):
         return x
 
 
-def SwinTransformer(cfg, model_name='swin_tiny_128', num_classes=1, include_top=True, pretrained=False, use_tpu=False, cfgs=CFGS, classification=None):
-    #cfg = from_config_file(config['model'])
+def SwinTransformer(cfg):
+    
+    #build model from config file
     net = SwinTransformerModel(
-        model_name=model_name, include_top=include_top, num_classes=cfg['num_classes'], img_size=cfg['input_size'], window_size=cfg[
-            'window_size'], embed_dim=cfg['embed_dim'], depths=cfg['depths'], num_heads=cfg['num_heads'],
-            classification=cfg['classification']
+        model_name=cfg['model_name'], include_top=cfg['include_top'], qk_scale=cfg['qk_scale'],
+        num_classes=cfg['num_classes'], img_size=cfg['input_size'], qkv_bias=cfg['qkv_bias'],
+        patch_size=(cfg['patch_size'], cfg['patch_size']), mlp_ratio=cfg['mlp_ratio'],
+        window_size=cfg['window_size'], embed_dim=cfg['embed_dim'], attn_drop_rate=cfg['attn_drop_rate'],
+        depths=cfg['depths'], num_heads=cfg['num_heads'], drop_path_rate=cfg['drop_path_rate'],
+        classification=cfg['classification'], patch_norm=cfg['patch_norm'], in_chans=cfg['channels'],
+        ape=cfg['ape']
     )
-    net(tf.keras.Input(shape=(cfg['input_size'][0], cfg['input_size'][1], 3)))
-    if pretrained is True:
-        url = f'https://github.com/rishigami/Swin-Transformer-TF/releases/download/v0.1-tf-swin-weights/{model_name}.tgz'
-        pretrained_ckpt = tf.keras.utils.get_file(
-            model_name, url, untar=True)
-    else:
-        pretrained_ckpt = pretrained
-
-    if pretrained_ckpt:
-        if tf.io.gfile.isdir(pretrained_ckpt):
-            pretrained_ckpt = f'{pretrained_ckpt}/{model_name}.ckpt'
-
-        if use_tpu:
-            load_locally = tf.saved_model.LoadOptions(
-                experimental_io_device='/job:localhost')
-            net.load_weights(pretrained_ckpt, options=load_locally)
-        else:
-            net.load_weights(pretrained_ckpt)
+    
+    net(tf.keras.Input(shape=(cfg['input_size'][0], cfg['input_size'][1], cfg['channels'])))
+    
 
     return net
 

@@ -33,7 +33,7 @@ runPath = f"{config['basePath']}/runs/{current_run}/"
 csv_logger = CSVLogger(f"{runPath}/training.csv", append=True, separator=';')
 logDir = f"{config['basePath']}/logs/scalars/{current_run}"
 #tensorboard_callback = keras.callbacks.TensorBoard(log_dir=logDir)
-checkpoint_callback = ModelCheckpoint(f'{runPath}/checkpoints/' + '{val_categorical_accuracy:.4}_{epoch:03d}.ckpt', 'val_categorical_accuracy', mode='max', save_best_only=True, save_weights_only=True)
+checkpoint_callback = ModelCheckpoint(f'{runPath}/checkpoints/' + '{val_loss:.4}_{epoch:03d}.ckpt', 'val_loss', mode='min', save_best_only=True, save_weights_only=True)
 
 
 if args.eval:

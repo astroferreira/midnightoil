@@ -4,8 +4,8 @@ trainingPlan:
     epochs: 400
     initialEpoch: 0
     batchSize: 256
-    dataPath: /home/ppxlf2/data/SDSS64/
-    tfrecordsColumns: ['N_major_mergers_aug']
+    dataPath: /home/ppxlf2/data/data_ratios/
+    tfrecordsColumns: ['ratios_log']
     distributed: false
 
 learningRateScheduler:
@@ -21,8 +21,8 @@ model:
     include_top: true
     input_size: [64, 64]
     patch_size: 4
-    channels: 1
-    num_classes: 3
+    channels: 3
+    num_classes: 1
     embed_dim: 30
     window_size: 4
     mlp_ratio: 4
@@ -35,7 +35,7 @@ model:
     patch_norm: true
     depths: [2, 2, 6, 2]
     num_heads: [1, 3, 6, 12]
-    classification: true
+    classification: false
 
 augmentation:
     flip: 0.5
@@ -45,7 +45,6 @@ augmentation:
     shear_y: 0.6
     oclusion: 0.7
 
-metrics: ['categorical_accuracy']
+metrics: ['MSE', 'MAE']
 optimizer: NesterovSGD
-loss: 'categorical_crossentropy'
-from-epoch: 0
+loss: 'MAE'

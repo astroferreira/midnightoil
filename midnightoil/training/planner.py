@@ -29,6 +29,7 @@ class TrainingPlanner:
     def loadConfig(self):
 
         self.configTraining = self.config['trainingPlan']
+        self.augs = self.config['augmentation']
         self.runName = self.configTraining['runName']
         self.epochs  = self.configTraining['epochs']
         self.initialEpoch = self.configTraining['initialEpoch']
@@ -40,6 +41,8 @@ class TrainingPlanner:
         self.loss = self.config['loss']
         self.metrics = self.config['metrics']
         self.configScheduler = self.config['learningRateScheduler']
+
+        self.parse_augmentations()
 
         if self.configTraining['distributed']:
             self.loadModelDistributed()
@@ -64,7 +67,7 @@ class TrainingPlanner:
 
     def loadModel(self):
 
-        self.model = loader.get_model(self.modelName, self.config['model'], self.classification)
+        self.model = loader.get_model(self.modelName, self.config['model'])
         self.scheduled_lrs = load_scheduler(self.configScheduler['scheduler'], self.configScheduler)
         self.optimizer = load_optimizer(self.config['optimizer'], self.scheduled_lrs)
         self.metrics.append(lr_metric(self.optimizer))
@@ -83,7 +86,8 @@ class TrainingPlanner:
                                                 epochs=(self.epochs-self.initialEpoch),
                                                 columns=self.columns,
                                                 training=training,
-                                                batch_size=self.batchSize)
+                                                batch_size=self.batchSize, 
+                                                augmentations=self.augmentations)
         
             self.training_dataset = self.training_dataset.with_options(ignore_order) 
 
@@ -108,4 +112,17 @@ class TrainingPlanner:
                                     validation_steps=21489//self.batchSize,
                                     callbacks=self.callbacks)
 
+
+    def parse_augmentations(self):
+
+        self.augmentations = {
+                         'flip': self.augs['flip'],
+                         'rotate90': self.augs['rotate90'],
+                         'rotate': self.augs['rotate'],
+                         'shear_x': self.augs['shear_x'],
+                         'shear_y': self.augs['shear_y'],
+                         'oclusion': self.augs['oclusion'],
+                         }
+
+        
         

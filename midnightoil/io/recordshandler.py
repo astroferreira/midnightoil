@@ -32,7 +32,7 @@ def parse(image_feature_description, columns, with_labels=True, with_rootnames=F
     def _parser(ep):
 
         example = tf.io.parse_single_example(ep, image_feature_description)
-        image = tf.io.decode_raw(example['X'], out_type=np.float64)
+        image = tf.io.decode_raw(example['X_log'], out_type=np.float64)
         image = tf.reshape(image, (64, 64, 3))
         
 

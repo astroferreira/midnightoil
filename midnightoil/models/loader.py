@@ -7,6 +7,6 @@ models_list = {
     'SwinTransformer' : SwinTransformer
 }
 
-def get_model(name, config, classification=False):
-    model = models_list[name](config, classification=classification)
+def get_model(name, config):
+    model = models_list[name](config)
     return model

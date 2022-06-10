@@ -10,10 +10,19 @@ import glob
 
 RNG = tf.random.Generator.from_seed(1331)
 
+
+augmentations_fns = {
+        'flip': flip,
+        'rotate90' : rotate90,
+        'rotate' : rotate,
+        'shear_x' : shear_x,
+        'shear_y' : shear_y,
+        'oclusion' : oclusion
+}
+
 def load_dataset(path, epochs, columns=['y'],
                  training=False, batch_size=128, 
-                 buffer_size=18000, augmentations=[flip, rotate90, rotate,  shear_x, shear_y, oclusion], 
-                 probs=[0.5, 0.5, 0.8, 0.6, 0.6, 0.7]):
+                 buffer_size=18000, augmentations=None):
     
 
     files = sorted(glob.glob(path))[0]
@@ -29,20 +38,30 @@ def load_dataset(path, epochs, columns=['y'],
     dataset = dataset.batch(batch_size, drop_remainder=True)
     
     if training:
-        dataset = dataset.shuffle(batch_size, reshuffle_each_iteration=True)
+        dataset = dataset.shuffle(batch_size//2, reshuffle_each_iteration=True)
 
-        for f, ps in zip(augmentations, probs):
+        for key in augmentations:
             
-            dataset = dataset.map(lambda x, y: tf.cond(tf.less(RNG.uniform((1,), 0, 1), ps), lambda: f(x, y), lambda: (x, y)),
+            fn = augmentations_fns[key]
+            ps = augmentations[key]
+
+            dataset = dataset.map(lambda x, y: tf.cond(tf.less(RNG.uniform((1,), 0, 1), ps), lambda: fn(x, y), lambda: (x, y)),
                                   num_parallel_calls=tf.data.AUTOTUNE)
     
         dataset.cache()
         
+    
+    #dataset = dataset.map(single_band,
+    #                      num_parallel_calls=tf.data.AUTOTUNE)
+
     dataset = dataset.repeat(epochs)
 
     dataset = dataset.prefetch(buffer_size=8)
-
     return dataset
+
+
+def single_band(x, y):
+    return x[:,:,:, 0:1], y
 
 def squeeze(x, y):
     return tf.squeeze(x), y
