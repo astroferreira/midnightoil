@@ -1,7 +1,7 @@
 basePath: /home/ppxlf2/sources/midnightoil
 trainingPlan:
     runName: 'ViT'
-    epochs: 400
+    epochs: 1000
     initialEpoch: 0
     batchSize: 256
     dataPath: /home/ppxlf2/data/data_ratios/
@@ -10,8 +10,8 @@ trainingPlan:
 
 learningRateScheduler:
     scheduler: WarmUpCosine
-    warmupSteps: 7780
-    cycleSteps: 77800
+    warmupSteps: 1570
+    cycleSteps: 31400
     lowerLR: 1.0e-5
     upperLR: 1.0e-2
 
@@ -23,8 +23,8 @@ model:
     patch_size: 4
     channels: 3
     num_classes: 1
-    embed_dim: 30
-    window_size: 4
+    embed_dim: 92
+    window_size: 8
     mlp_ratio: 4
     qkv_bias: true
     qk_scale: true
@@ -33,8 +33,8 @@ model:
     drop_path_rate: 0.1
     ape: false
     patch_norm: true
-    depths: [2, 2, 6, 2]
-    num_heads: [1, 3, 6, 12]
+    depths: [2, 2, 8, 2]
+    num_heads: [2, 6, 12, 24]
     classification: false
 
 augmentation:
