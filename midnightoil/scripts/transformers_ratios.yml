@@ -23,7 +23,7 @@ model:
     patch_size: 4
     channels: 3
     num_classes: 1
-    embed_dim: 92
+    embed_dim: 90
     window_size: 8
     mlp_ratio: 4
     qkv_bias: true

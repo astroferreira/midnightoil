@@ -108,8 +108,8 @@ class TrainingPlanner:
                                     validation_data=self.test_dataset,
                                     epochs=self.epochs,
                                     initial_epoch=self.initialEpoch,
-                                    steps_per_epoch=99660//self.batchSize,
-                                    validation_steps=21489//self.batchSize,
+                                    steps_per_epoch=80369//self.batchSize,
+                                    validation_steps=17198//self.batchSize,
                                     callbacks=self.callbacks)
 
 
