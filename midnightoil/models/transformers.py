@@ -1,6 +1,7 @@
 import numpy as np
+import optuna
 import tensorflow as tf
-from tensorflow.keras.layers import Dense, Dropout, Conv2D, LayerNormalization, GlobalAveragePooling1D
+from tensorflow.keras.layers import Dense, Dropout, Conv2D, LayerNormalization, GlobalAveragePooling1D, Resizing
 
 CFGS = {
     'swin_large': dict(input_size=(64, 64), window_size=8, embed_dim=96, depths=[2, 2, 18, 2], num_heads=[3, 6, 12, 24]),
@@ -408,7 +409,7 @@ class SwinTransformerModel(tf.keras.Model):
         self.avgpool = GlobalAveragePooling1D()
         if self.include_top:
             if self.classification:
-                self.head = Dense(num_classes, activation='softmax', name='head')
+                self.head = Dense(num_classes, activation='sigmoid', name='head')
             else:
                 self.head = Dense(num_classes, activation='linear', name='head')
         else:
@@ -445,7 +446,38 @@ def SwinTransformer(cfg):
         ape=cfg['ape']
     )
     
-    net(tf.keras.Input(shape=(cfg['input_size'][0], cfg['input_size'][1], cfg['channels'])))
+    X = tf.keras.Input(shape=(cfg['input_size'][0], cfg['input_size'][1], cfg['channels']))
+    net(X)
+    
+
+    return net
+
+
+def SwinTransformerOpt(trial):
+
+    model_name = 'SwinTransformerPMOpt'
+    include_top = True
+    qk_scale = True
+    patch_size = trial.suggest_categorical('patch_size', [4, 8])
+    mlp_ratio = trial.suggest_categorical('mlp_ratio', [4, 8])
+    attn_drop_rate = trial.suggest_uniform('attn_drop_rate', 0.0, 0.25)
+    drop_path_rate = trial.suggest_uniform('drop_path_rate', 0.0, 0.25)
+    depths = trial.suggest_categorical('depths', [[2, 2, 6, 2], [4, 4, 6, 4], [2, 2, 12, 2]])
+    num_heads = trial.suggest_categorical('num_heads', [[2, 6, 12, 24], [1, 2, 4, 8], [4, 8, 16, 32], [4, 4, 4, 4]])
+    embed_dim = trial.suggest_categorical('embed_dim', [32, 64, 96, 128])
+
+    net = SwinTransformerModel(
+        model_name=model_name, include_top=include_top, qk_scale=qk_scale,
+        num_classes=2, img_size=(128, 128), qkv_bias=True,
+        patch_size=(patch_size, patch_size), mlp_ratio=mlp_ratio,
+        window_size=8, embed_dim=embed_dim, attn_drop_rate=attn_drop_rate,
+        depths=depths, num_heads=num_heads, drop_path_rate=drop_path_rate,
+        classification=True, patch_norm=True, in_chans=1,
+        ape=False
+    )
+    
+    X = tf.keras.Input(shape=(128, 128, 1))
+    net(X)
     
 
     return net

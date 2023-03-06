@@ -24,7 +24,6 @@ def load_dataset(path, epochs, columns=['y'],
                  training=False, batch_size=128, 
                  buffer_size=18000, augmentations=None):
     
-
     files = sorted(glob.glob(path))[0]
     dataset = tf.data.TFRecordDataset(files)
     image_feature_description = construct_feature_description(dataset)
@@ -32,13 +31,12 @@ def load_dataset(path, epochs, columns=['y'],
 
     files = glob.glob(path)
     files.sort(key=natural_keys)
-
     dataset = tf.data.TFRecordDataset(files, num_parallel_reads=tf.data.AUTOTUNE)
     dataset = dataset.map(map_function)
     dataset = dataset.batch(batch_size, drop_remainder=True)
-    
+    dataset = dataset.shuffle(5000, reshuffle_each_iteration=True)
     if training:
-        dataset = dataset.shuffle(batch_size//2, reshuffle_each_iteration=True)
+        
 
         for key in augmentations:
             

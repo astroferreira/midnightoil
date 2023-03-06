@@ -73,16 +73,16 @@ class Block(tf.keras.Model):
         return inputs + self.drop_path(x)
 
 
-def createMergenext(config=None, classification=False) -> keras.Model:
+def createMergenext(config=None, classification=True) -> keras.Model:
 
-    numOutputs = config['numOutputs']
-    inputShape = config['inputShape']
-    stemSize = config['stemUndersample']
-    normEpsilon = config['layerNormalizationEpsilon']
-    depths = config['depths']
-    dims = config['dims']
-    dropPathRate = config['dropPathRate']
-    layerScaleInitValue = config['layerScaleInitValue']
+    numOutputs = config['num_classes']
+    inputShape = config['input_size']
+    stemSize = 1#config['stemUndersample']
+    normEpsilon = 0#config['layerNormalizationEpsilon']
+    depths = [1, 2, 4] #config['depths']
+    dims = [128, 256, 512]#config['dims']
+    dropPathRate = 0.0#config['dropPathRate']
+    layerScaleInitValue = 1#config['layerScaleInitValue']
 
     numStages = len(dims)
 

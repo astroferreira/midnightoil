@@ -1,0 +1,52 @@
+basePath: /home/ferreira/projects/def-sellison/ferreira/CFISML/
+trainingPlan:
+    runName: 'ViT'
+    epochs: 1000
+    initialEpoch: 0
+    batchSize: 128
+    dataPath: /home/ferreira/projects/def-sellison/ferreira/CFISML/data_rb2021
+    tfrecordsColumns: ['y']
+    distributed: false
+    optimization: true
+
+learningRateScheduler:
+    scheduler: WarmUpCosine
+    warmupSteps: 2560
+    cycleSteps: 51200
+    lowerLR: 1.0e-4
+    upperLR: 1.0e-3
+
+modelName: 'SwinTransformer'
+model:
+    model_name: 'swin_large'
+    include_top: true
+    input_size: [128, 128]
+    patch_size: 4
+    channels: 1
+    num_classes: 2
+    embed_dim: 96
+    window_size: 8
+    mlp_ratio: 4
+    qkv_bias: true
+    qk_scale: true
+    drop_rate: 0.1
+    attn_drop_rate: 0.1
+    drop_path_rate: 0.1
+    ape: false
+    patch_norm: true
+    depths: [2, 2, 6, 2]
+    num_heads: [2, 6, 12, 24]
+    classification: true
+
+augmentation:
+    flip: 0.5
+    rotate90: 0.5
+    rotate: 0.5
+    shear_x: 0.0
+    shear_y: 0.0
+    oclusion: 0.5
+
+metrics: ['accuracy']
+optimizer: NesterovSGD
+loss: 'CategoricalCrossentropyLS'
+from-epoch: 0

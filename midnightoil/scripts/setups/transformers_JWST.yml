@@ -1,0 +1,51 @@
+basePath: /home/ppxlf2/sources/midnightoil
+trainingPlan:
+    runName: 'ViT'
+    epochs: 50
+    initialEpoch: 0
+    batchSize: 256
+    dataPath: /home/ppxlf2/data/JWSTML/
+    tfrecordsColumns: ['y']
+    distributed: false
+
+learningRateScheduler:
+    scheduler: WarmUpCosine
+    warmupSteps: 10369
+    cycleSteps: 103690
+    lowerLR: 1.0e-4
+    upperLR: 1.0e-4
+
+modelName: 'SwinTransformer'
+model:
+    model_name: 'swin_large'
+    include_top: true
+    input_size: [64, 64]
+    patch_size: 4
+    channels: 6
+    num_classes: 3
+    embed_dim: 30
+    window_size: 4
+    mlp_ratio: 4
+    qkv_bias: true
+    qk_scale: true
+    drop_rate: 0.1
+    attn_drop_rate: 0.1
+    drop_path_rate: 0.1
+    ape: false
+    patch_norm: true
+    depths: [2, 2, 6, 2]
+    num_heads: [1, 3, 6, 12]
+    classification: true
+
+augmentation:
+    flip: 0.7
+    rotate90: 0.7
+    rotate: 0.5
+    shear_x: 0.0
+    shear_y: 0.0
+    oclusion: 0.5
+
+metrics: ['categorical_accuracy']
+optimizer: NesterovSGD
+loss: 'categorical_crossentropy'
+from-epoch: 0

@@ -1,10 +1,13 @@
 from .mergenext import createMergenext
-from .transformers import SwinTransformer
+from .transformers import SwinTransformer, SwinTransformerOpt
+from .ferreira2020 import FERREIRA2020Net
 
 
 models_list = {
     'MergeNeXt' : createMergenext,
-    'SwinTransformer' : SwinTransformer
+    'SwinTransformer' : SwinTransformer,
+    'SwinTransformerOpt' : SwinTransformerOpt,
+    'FERREIRA' : FERREIRA2020Net
 }
 
 def get_model(name, config):

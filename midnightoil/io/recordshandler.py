@@ -3,6 +3,22 @@ import numpy as np
 import math
 import pandas as pd
 
+from scipy.ndimage import zoom
+
+def normalize(img, size=128):
+    
+    flux = img.sum()
+    
+    scaled = zoom(img, size/img.shape[0], order=0)
+    scaled = (scaled/scaled.sum())*flux
+    
+    
+    asinh_img = np.arcsinh(scaled)
+    asinh_img = (asinh_img - asinh_img[~np.isnan(asinh_img)].min()) / (asinh_img[~np.isnan(asinh_img)].max() - asinh_img[~np.isnan(asinh_img)].min())
+    asinh_img[np.isnan(asinh_img)] = 0
+    
+    return asinh_img
+
 def _bytes_feature(value):
     """Returns a bytes_list from a string / byte."""
     if isinstance(value, type(tf.constant(0))):
@@ -32,10 +48,13 @@ def parse(image_feature_description, columns, with_labels=True, with_rootnames=F
     def _parser(ep):
 
         example = tf.io.parse_single_example(ep, image_feature_description)
-        image = tf.io.decode_raw(example['X_log'], out_type=np.float64)
-        image = tf.reshape(image, (64, 64, 3))
+        image = tf.io.decode_raw(example['X'], out_type=np.float64)
+        image = tf.reshape(image, (128, 128, 1))
+        #image = tf.where(tf.math.is_nan(image), tf.zeros_like(image), image)
         
-
+        #labels = tf.io.decode_raw(example['y'], out_type=np.float64)
+        #labels = tf.reshape(labels, (2,))
+        
         labels = []
         for col in columns:
             if col == 'N_major_mergers_aug':
@@ -45,11 +64,11 @@ def parse(image_feature_description, columns, with_labels=True, with_rootnames=F
                     labels = tf.one_hot(tf.cast(example[col], tf.uint8), depth=3)
                
             else:
-                labels =  example[col]#tf.where(tf.math.is_nan(example[col]), tf.zeros_like(example[col]), example[col])
-                          
+                labels =  tf.one_hot(tf.cast(example[col], tf.uint8), depth=2)#example[col]#tf.where(tf.math.is_nan(example[col]), tf.zeros_like(example[col]), example[col])
+                        
         if with_labels:
             if with_rootnames:
-                return image, labels, example['rootname']
+                return image, labels, example['DB_ID']
             else:
                 return image, labels
         
@@ -89,11 +108,12 @@ def generate_TFRecords(outputname, df_name, dataset_name):
             writer.write(tf_example.SerializeToString())
 
 import tqdm
-def write_images_to_tfr_long(df_name, dataset_name, filename:str="datashard", max_files:int=1000, out_dir:str="/home/ppxlf2/mergenet/data/SDSS/"):
+from astropy.io import fits
+def write_images_to_tfr_long(path_df, dataset_name, filename:str="CFIS_datashard", max_files:int=4096, out_dir:str="/astro/astroferreira/data/ML/CFIS/"):
 
     
-    dataframe = pd.read_pickle(f'{out_dir}{df_name}.pk')
-    data = np.load(f'{out_dir}{dataset_name}.npy')
+    dataframe = pd.read_pickle(f'{path_df}')
+    #data = np.load(f'{out_dir}{dataset_name}.npy')
 
     splits = (dataframe.shape[0]//max_files) + 1
     if dataframe.shape[0] % max_files == 0:
@@ -102,8 +122,6 @@ def write_images_to_tfr_long(df_name, dataset_name, filename:str="datashard", ma
     print(f"\nUsing {splits} shard(s) for {dataframe.shape[0]} files, with up to {max_files} samples per shard")
 
     file_count = 0
-
-
     for i in tqdm.tqdm(range(splits)):
         current_shard_name = "{}{}_{}-{}.tfrecords".format(out_dir, filename, i+1, splits)
         writer = tf.io.TFRecordWriter(current_shard_name)
@@ -115,15 +133,13 @@ def write_images_to_tfr_long(df_name, dataset_name, filename:str="datashard", ma
             if index == dataframe.shape[0]: #when we have consumed the whole data, preempt generation
                 break
 
-
-            current_image = data[index]
             row = dataframe.iloc[index]
+            snapNum = int(row.snapNum)
+            ID = int(row.subfindID)
+            label = int(row.Flagpostmerger)
+            current_image = normalize(fits.getdata(f'~/data/TNG/BOBBYDATA/mock_surv_sci/map_new_Mstar_TNG100-1_{ID}_0{snapNum}_50kpc_2048_sci_.fits'))
 
-            if row.label == 'PM':
-                label = 0
-            else:
-                label = 1
-
+#            current_image = data[index]
             fits_bytes = current_image.tobytes()
             
             tf_example = serialize_df(fits_bytes, 

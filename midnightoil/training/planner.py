@@ -4,10 +4,10 @@ import tensorflow as tf
 
 from tensorflow.keras import mixed_precision
 
-
-from focal_loss import SparseCategoricalFocalLoss 
+import optuna
 
 from ..models import loader
+from ..losses import load_loss
 from ..schedulers import load_scheduler
 from ..optimizers import load_optimizer
 from ..metrics import lr_metric
@@ -35,20 +35,24 @@ class TrainingPlanner:
         self.initialEpoch = self.configTraining['initialEpoch']
         self.batchSize  = self.configTraining['batchSize']
         self.dataPath  = self.configTraining['dataPath']
+        self.evalPath  = self.configTraining['evalPath']
         self.columns = self.configTraining['tfrecordsColumns']
         self.classification = self.config['model']['classification']
         self.modelName = self.config['modelName']
-        self.loss = self.config['loss']
         self.metrics = self.config['metrics']
         self.configScheduler = self.config['learningRateScheduler']
 
+        self.train_size = self.configTraining['train_size']
+        self.test_size = self.configTraining['test_size']
+
         self.parse_augmentations()
 
-        if self.configTraining['distributed']:
-            self.loadModelDistributed()
-        else:
-            self.loadModel()
-    
+        if not self.configTraining['optmization']:
+            if self.configTraining['distributed']:
+                self.loadModelDistributed()
+            else:
+                self.loadModel()
+        
 
     def loadModelDistributed(self):
     
@@ -60,17 +64,39 @@ class TrainingPlanner:
             self.model = loader.get_model(self.modelName, self.config['model'], self.classification)
             self.scheduled_lrs = load_scheduler(self.configScheduler['scheduler'], self.configScheduler)
             self.optimizer = load_optimizer(self.config['optimizer'], self.scheduled_lrs)
+            self.loss = load_loss(self.config['loss'])
             self.metrics.append(lr_metric(self.optimizer))
             self.model.compile(optimizer=self.optimizer, loss=self.loss,
                             metrics=self.metrics)
             
 
     def loadModel(self):
+        
+        mixed_precision.set_global_policy('mixed_float16')
+
 
         self.model = loader.get_model(self.modelName, self.config['model'])
-        self.scheduled_lrs = load_scheduler(self.configScheduler['scheduler'], self.configScheduler)
+        self.scheduled_lrs = load_scheduler(self.configScheduler['scheduler'], self.configScheduler, train_size=self.train_size, batch_size=self.batchSize)
         self.optimizer = load_optimizer(self.config['optimizer'], self.scheduled_lrs)
-        self.metrics.append(lr_metric(self.optimizer))
+        #self.metrics.append(lr_metric(self.optimizer))
+        self.loss = load_loss(self.config['loss'])
+        self.metrics.append(tf.keras.metrics.Precision())
+        self.metrics.append(tf.keras.metrics.Recall())
+        self.model.compile(optimizer=self.optimizer, loss=self.loss,
+                        metrics=self.metrics)
+        print(self.model.summary(expand_nested=True))
+
+    def loadModelOpt(self, trial):
+
+        #mixed_precision.set_global_policy('mixed_float16')
+
+        self.model = loader.get_model('SwinTransformerOpt', trial)
+        self.scheduled_lrs = load_scheduler(self.configScheduler['scheduler'], self.configScheduler, train_size=self.train_size, batch_size=self.batchSize)
+
+        optmizer = trial.suggest_categorical('optimizer', ['NesterovSGD', 'SGD', 'Adam', 'AdamW'])
+
+        self.optimizer = load_optimizer(optmizer, self.scheduled_lrs)
+        self.loss = load_loss(self.config['loss'])
         self.model.compile(optimizer=self.optimizer, loss=self.loss,
                         metrics=self.metrics)
 
@@ -82,7 +108,7 @@ class TrainingPlanner:
         ignore_order.experimental_deterministic = False
         print(f'EPOCHS = {self.epochs}')
         if training:
-            self.training_dataset = load_dataset(f'{self.dataPath}/train/train*.tfrecords',
+            self.training_dataset = load_dataset(f'{self.dataPath}/*.tfrecords',
                                                 epochs=(self.epochs-self.initialEpoch),
                                                 columns=self.columns,
                                                 training=training,
@@ -95,7 +121,14 @@ class TrainingPlanner:
         if batchSize is None:
             batchSize = self.batchSize
 
-        self.test_dataset = load_dataset(f'{self.dataPath}/val/val*.tfrecords', epochs=self.epochs,
+        dataPath = f'{self.dataPath}/val/*.tfrecords'
+
+        if self.evalPath is not False:
+            dataPath = f'{self.evalPath}/*.tfrecords'
+
+
+
+        self.test_dataset = load_dataset(dataPath, epochs=self.epochs,
                                             columns=self.columns, training=False,
                                             batch_size=batchSize, augmentations=[])
         
@@ -108,9 +141,10 @@ class TrainingPlanner:
                                     validation_data=self.test_dataset,
                                     epochs=self.epochs,
                                     initial_epoch=self.initialEpoch,
-                                    steps_per_epoch=80369//self.batchSize,
-                                    validation_steps=17198//self.batchSize,
-                                    callbacks=self.callbacks)
+                                    steps_per_epoch=self.train_size//self.batchSize,
+                                    validation_steps=self.test_size//self.batchSize,
+                                    callbacks=self.callbacks, 
+                                    use_multiprocessing = True)
 
 
     def parse_augmentations(self):

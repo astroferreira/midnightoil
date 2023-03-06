@@ -4,8 +4,8 @@ trainingPlan:
     epochs: 1000
     initialEpoch: 0
     batchSize: 256
-    dataPath: /home/ppxlf2/data/data_ratios/
-    tfrecordsColumns: ['ratios_log']
+    dataPath: /home/ppxlf2/data/data_ratiosv2/
+    tfrecordsColumns: ['ratios']
     distributed: false
 
 learningRateScheduler:

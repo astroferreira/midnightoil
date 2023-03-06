@@ -2,17 +2,15 @@ import tensorflow as tf
 import numpy as np
 
 
-
-
 class WarmUpCosine(tf.keras.optimizers.schedules.LearningRateSchedule):
     
-    def __init__(self, params, restart=True):
+    def __init__(self, params, train_size=1000, batch_size=128, restart=True):
         super(WarmUpCosine, self).__init__()
 
         self.learning_rate_base = params['upperLR']
-        self.total_steps = params['cycleSteps']
+        self.total_steps = params['cycleEpochs'] * (train_size // batch_size)
         self.warmup_learning_rate = params['lowerLR']
-        self.warmup_steps = params['warmupSteps']
+        self.warmup_steps = params['warmupEpochs'] * (train_size // batch_size)
         self.pi = tf.constant(np.pi)
         self.restart = restart
 
@@ -55,5 +53,5 @@ schedulers_list = {
     'WarmUpCosine' : WarmUpCosine
 }
 
-def load_scheduler(name, params):
-    return schedulers_list[name](params)
+def load_scheduler(name, params, train_size=1000, batch_size=128):
+    return schedulers_list[name](params, train_size=train_size, batch_size=batch_size)

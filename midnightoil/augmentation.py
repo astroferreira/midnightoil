@@ -33,7 +33,7 @@ def color(x, y):
     x = tf.image.random_contrast(x, 0.7, 1.3)
     return x, y
 
-def oclusion(x: tf.Tensor, y: tf.Tensor, size=8) -> Tuple[tf.Tensor, tf.Tensor]:
+def oclusion(x: tf.Tensor, y: tf.Tensor, size=16) -> Tuple[tf.Tensor, tf.Tensor]:
     return tfa.image.random_cutout(x, (size, size), constant_values=0), y
 
 def central_crop(x, y):
