@@ -5,13 +5,13 @@ trainingPlan:
     initialEpoch: 0
     batchSize: 256
     dataPath: /home/ferreira/projects/def-sellison/ferreira/CFISML/partial_train_CFIS
-    evalPath: /home/ferreira/projects/def-sellison/ferreira/CFISML/partial_test_CFIS    
+    evalPath: /home/ferreira/projects/def-sellison/ferreira/CFISML/partial_test_CFIS
     tfrecordsColumns: ['y']
     optmization: false
     distributed: false
     train_size: 67161
     test_size: 7448
-    from-epoch: 200
+    from-epoch: 0
 
 learningRateScheduler:
     scheduler: WarmUpCosine

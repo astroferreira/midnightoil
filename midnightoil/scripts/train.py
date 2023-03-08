@@ -61,7 +61,7 @@ if args.resume_run:
     
         logger.info(f'Resuming training from epoch {epoch} to {epoch+200}, starting with val_loss {last_loss}')
 
-        tPlanner = TrainingPlanner(config, currentRun=current_run, callbacks=checkpoints)    
+        tPlanner = TrainingPlanner(config, currentRun=current_run, callbacks=callbacks)    
         logger.info(f'Loading weights from {latest}')
         tPlanner.model.load_weights(latest)
         tPlanner.initialEpoch = epoch

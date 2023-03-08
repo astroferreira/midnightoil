@@ -71,20 +71,21 @@ class TrainingPlanner:
             
 
     def loadModel(self):
+
+        strategy = tf.distribute.MirroredStrategy()
         
         mixed_precision.set_global_policy('mixed_float16')
-
-
-        self.model = loader.get_model(self.modelName, self.config['model'])
-        self.scheduled_lrs = load_scheduler(self.configScheduler['scheduler'], self.configScheduler, train_size=self.train_size, batch_size=self.batchSize)
-        self.optimizer = load_optimizer(self.config['optimizer'], self.scheduled_lrs)
-        #self.metrics.append(lr_metric(self.optimizer))
-        self.loss = load_loss(self.config['loss'])
-        self.metrics.append(tf.keras.metrics.Precision())
-        self.metrics.append(tf.keras.metrics.Recall())
-        self.model.compile(optimizer=self.optimizer, loss=self.loss,
-                        metrics=self.metrics)
-        print(self.model.summary(expand_nested=True))
+        with strategy.scope():
+            self.model = loader.get_model(self.modelName, self.config['model'])
+            self.scheduled_lrs = load_scheduler(self.configScheduler['scheduler'], self.configScheduler, train_size=self.train_size, batch_size=self.batchSize)
+            self.optimizer = load_optimizer(self.config['optimizer'], self.scheduled_lrs)
+            #self.metrics.append(lr_metric(self.optimizer))
+            self.loss = load_loss(self.config['loss'])
+            self.metrics.append(tf.keras.metrics.Precision())
+            self.metrics.append(tf.keras.metrics.Recall())
+            self.model.compile(optimizer=self.optimizer, loss=self.loss,
+                            metrics=self.metrics)
+            print(self.model.summary(expand_nested=True))
 
     def loadModelOpt(self, trial):
 
@@ -102,7 +103,7 @@ class TrainingPlanner:
 
         
 
-    def loadData(self, training=True, batchSize=None):
+    def loadData(self, training=True, batchSize=None, with_rootnames=False):
         
         ignore_order = tf.data.Options()
         ignore_order.experimental_deterministic = False
@@ -130,7 +131,7 @@ class TrainingPlanner:
 
         self.test_dataset = load_dataset(dataPath, epochs=self.epochs,
                                             columns=self.columns, training=False,
-                                            batch_size=batchSize, augmentations=[])
+                                            batch_size=batchSize, augmentations=[], with_rootnames=with_rootnames)
         
         self.test_dataset = self.test_dataset.with_options(ignore_order)
 
@@ -150,13 +151,14 @@ class TrainingPlanner:
     def parse_augmentations(self):
 
         self.augmentations = {
-                         'flip': self.augs['flip'],
-                         'rotate90': self.augs['rotate90'],
-                         'rotate': self.augs['rotate'],
-                         'shear_x': self.augs['shear_x'],
-                         'shear_y': self.augs['shear_y'],
-                         'oclusion': self.augs['oclusion'],
-                         }
+            #'num_layers' : int(self.augs['num_layers'])
+            'flip': self.augs['flip'],
+            'rotate90': self.augs['rotate90'],
+            'rotate': self.augs['rotate'],
+            'shear_x': self.augs['shear_x'],
+            'shear_y': self.augs['shear_y'],
+            'oclusion': self.augs['oclusion'],
+            }
 
         
         

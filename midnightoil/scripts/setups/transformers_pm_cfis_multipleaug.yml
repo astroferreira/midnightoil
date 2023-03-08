@@ -43,6 +43,7 @@ model:
     classification: true
 
 augmentation:
+    num_layers: 3
     flip: 0.5
     rotate90: 0.5
     rotate: 0.5

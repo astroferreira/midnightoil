@@ -34,8 +34,9 @@ def handle_args():
 
     args = parser.parse_args(sys.argv[1:])
 
-    
+    config_name = args.config.split('/')[-1].split('.')[0]
     config = yaml.safe_load(open(args.config)) 
+    
 
     os.environ["CUDA_VISIBLE_DEVICES"] = args.GPUS
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = args.tf_log_level
@@ -47,9 +48,9 @@ def handle_args():
         runs = [str(f.split('/')[-1]) for f in sorted(glob.glob(f"{config['basePath']}/runs/*"))]
 
         if len(runs) > 0:
-            current_run = f"{int(runs[-1].split('_')[0])+1:03}_{timestamp}"
+            current_run = f"{int(runs[-1].split('_')[0])+1:03}_{timestamp}_{config_name}"
         else:
-            current_run = f'001_{timestamp}'
+            current_run = f'001_{timestamp}_{config_name}'
  
         run_dirname = f"{config['basePath']}/runs/{current_run}"
         if not os.path.exists(run_dirname):
