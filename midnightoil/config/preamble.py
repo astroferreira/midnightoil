@@ -7,8 +7,6 @@ import tensorflow as tf
 
 from datetime import datetime 
 
-
-
 class Config(object):
 
     def __init__(self):
@@ -26,17 +24,22 @@ class Config(object):
 def handle_args():
     parser = argparse.ArgumentParser(description="Train the merger CNN")
     parser.add_argument('--config', default='default.yml')
-    parser.add_argument('--GPUS', default='0,1')
+    parser.add_argument('--GPUS', default='0,1,2,3')
     parser.add_argument('--eval', action='store_true')
     parser.add_argument('--tf_log_level', default='3')
     parser.add_argument('--resume_run', default=None)
     parser.add_argument('--from_epoch', default=0)
+    parser.add_argument('--dataset', default=None)
 
     args = parser.parse_args(sys.argv[1:])
 
     config_name = args.config.split('/')[-1].split('.')[0]
     config = yaml.safe_load(open(args.config)) 
     
+    print(args.dataset)
+    if args.dataset is not None:
+        print('TEST')
+        config['trainingPlan']['evalPath'] = args.dataset
 
     os.environ["CUDA_VISIBLE_DEVICES"] = args.GPUS
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = args.tf_log_level
@@ -48,9 +51,9 @@ def handle_args():
         runs = [str(f.split('/')[-1]) for f in sorted(glob.glob(f"{config['basePath']}/runs/*"))]
 
         if len(runs) > 0:
-            current_run = f"{int(runs[-1].split('_')[0])+1:03}_{timestamp}_{config_name}"
+            current_run = f"{int(runs[-1].split('_')[0])+1:03}_{config['model']['name']}_{timestamp}"
         else:
-            current_run = f'001_{timestamp}_{config_name}'
+            current_run = f"001_{config['model']['name']}_{timestamp}"
  
         run_dirname = f"{config['basePath']}/runs/{current_run}"
         if not os.path.exists(run_dirname):

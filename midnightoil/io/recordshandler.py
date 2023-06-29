@@ -2,22 +2,64 @@ import tensorflow as tf
 import numpy as np
 import math
 import pandas as pd
-
+import glob
 from scipy.ndimage import zoom
 
-def normalize(img, size=128):
-    
-    flux = img.sum()
-    
-    scaled = zoom(img, size/img.shape[0], order=0)
-    scaled = (scaled/scaled.sum())*flux
-    
-    
-    asinh_img = np.arcsinh(scaled)
-    asinh_img = (asinh_img - asinh_img[~np.isnan(asinh_img)].min()) / (asinh_img[~np.isnan(asinh_img)].max() - asinh_img[~np.isnan(asinh_img)].min())
-    asinh_img[np.isnan(asinh_img)] = 0
-    
-    return asinh_img
+
+def parse(image_feature_description, columns, with_labels=True, with_rootnames=False, model_cfg=None):
+
+    def _parser(ep):
+
+        example = tf.io.parse_single_example(ep, image_feature_description)
+        image = tf.io.decode_raw(example['X'], out_type=np.float32)
+
+        if model_cfg is None:
+            input_shape = (128, 128, 1)
+        else:
+            input_shape = (model_cfg['input_size'][0], model_cfg['input_size'][1], model_cfg['channels'])    
+        
+        image = tf.reshape(image, input_shape)
+        #labels =  example['MassRatio']#tf.cast(example['MassRatio'], dtype=np.float32)
+        labels = tf.one_hot(tf.cast(example['y'], dtype=tf.int64), depth=2)
+        
+                        
+        if with_labels:
+            if with_rootnames:
+                return image, labels, example['DB_ID']
+            else:
+                return image, labels
+        
+        return image
+
+    return _parser
+
+
+"""
+    These function below are used to generate tfrecord files, they are not used to read them
+"""
+def construct_feature_description(dataset):
+
+    description = {
+        'bytes' : tf.io.FixedLenFeature([], tf.string),
+        'int64' : tf.io.FixedLenFeature([], tf.int64),
+        'float' : tf.io.FixedLenFeature([], tf.float32)
+    }
+
+    for raw_record in dataset.take(1):
+        example = tf.train.Example()
+        example.ParseFromString(raw_record.numpy())
+        break
+
+    image_feature_description = {}
+
+    features = list(example.features.feature)
+    print(features)
+    for feature in features:
+        unserial_info = str(example.features.feature[feature]).split('_')[0]
+        image_feature_description[feature] = description[unserial_info]
+
+    return image_feature_description
+
 
 def _bytes_feature(value):
     """Returns a bytes_list from a string / byte."""
@@ -42,158 +84,3 @@ def _str_feature(value):
 
     value = str.encode(str(value))
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
-
-def parse(image_feature_description, columns, with_labels=True, with_rootnames=False):
-
-    def _parser(ep):
-
-        example = tf.io.parse_single_example(ep, image_feature_description)
-        image = tf.io.decode_raw(example['X'], out_type=np.float64)
-        image = tf.reshape(image, (128, 128, 1))
-        #image = tf.where(tf.math.is_nan(image), tf.zeros_like(image), image)
-        
-        #labels = tf.io.decode_raw(example['y'], out_type=np.float64)
-        #labels = tf.reshape(labels, (2,))
-        
-        labels = []
-        for col in columns:
-            if col == 'N_major_mergers_aug':
-                if len(columns) > 1:
-                    labels.append(tf.one_hot(tf.cast(example[col], tf.uint8), depth=3))
-                else:
-                    labels = tf.one_hot(tf.cast(example[col], tf.uint8), depth=3)
-               
-            else:
-                labels =  tf.one_hot(tf.cast(example[col], tf.uint8), depth=2)#example[col]#tf.where(tf.math.is_nan(example[col]), tf.zeros_like(example[col]), example[col])
-                        
-        if with_labels:
-            if with_rootnames:
-                return image, labels, example['DB_ID']
-            else:
-                return image, labels
-        
-        return image
-
-    return _parser
-
-def generate_TFRecords(outputname, df_name, dataset_name):
-    
-    dataframe = pd.read_pickle(f'/home/ppxlf2/mergenet/data/clean/{df_name}.pk')
-    data = np.load(f'/home/ppxlf2/mergenet/data/clean/{dataset_name}.npy')
-   
-    #if filter:
-    #    index = np.where((dataframe.NULL_FLUX_PP_FLAG == 0) & (dataframe.NULL_COVERAGE_FLAG == 0))
-    #    dataframe = dataframe.iloc[index]
-    # data = data[index]
-    #dataframe = dataframe.reset_index(drop=True)
-
-    record_file = f'/home/ppxlf2/mergenet/data/clean/{outputname}.tfrecords'    
-
-    dataframe = dataframe.reset_index(drop=True)
-    with tf.io.TFRecordWriter(record_file) as writer:
-        for idx, row in dataframe.iterrows():
-            print(idx)
-            if row.label == 'PM':
-                label = 0
-            else:
-                label = 1
-            
-            fits_bytes = data[idx, :,:].tobytes()
-            
-            tf_example = serialize_df(fits_bytes, 
-                                       label,
-                                       dataframe,
-                                       row)
-
-            writer.write(tf_example.SerializeToString())
-
-import tqdm
-from astropy.io import fits
-def write_images_to_tfr_long(path_df, dataset_name, filename:str="CFIS_datashard", max_files:int=4096, out_dir:str="/astro/astroferreira/data/ML/CFIS/"):
-
-    
-    dataframe = pd.read_pickle(f'{path_df}')
-    #data = np.load(f'{out_dir}{dataset_name}.npy')
-
-    splits = (dataframe.shape[0]//max_files) + 1
-    if dataframe.shape[0] % max_files == 0:
-        splits -= 1
-    
-    print(f"\nUsing {splits} shard(s) for {dataframe.shape[0]} files, with up to {max_files} samples per shard")
-
-    file_count = 0
-    for i in tqdm.tqdm(range(splits)):
-        current_shard_name = "{}{}_{}-{}.tfrecords".format(out_dir, filename, i+1, splits)
-        writer = tf.io.TFRecordWriter(current_shard_name)
-
-        current_shard_count = 0
-        while current_shard_count < max_files: 
-
-            index = i*max_files+current_shard_count
-            if index == dataframe.shape[0]: #when we have consumed the whole data, preempt generation
-                break
-
-            row = dataframe.iloc[index]
-            snapNum = int(row.snapNum)
-            ID = int(row.subfindID)
-            label = int(row.Flagpostmerger)
-            current_image = normalize(fits.getdata(f'~/data/TNG/BOBBYDATA/mock_surv_sci/map_new_Mstar_TNG100-1_{ID}_0{snapNum}_50kpc_2048_sci_.fits'))
-
-#            current_image = data[index]
-            fits_bytes = current_image.tobytes()
-            
-            tf_example = serialize_df(fits_bytes, 
-                                    label,
-                                    dataframe,
-                                    row)
-            #create the required Example representation
-           
-            writer.write(tf_example.SerializeToString())
-            current_shard_count+=1
-            file_count += 1
-
-    writer.close()
-    print(f"\nWrote {file_count} elements to TFRecord")
-    return file_count
-
-def serialize_df(X, y, df, row):
-    """
-        This function serializes the input image, its labels and all
-        other columns present in the dataframe df.
-    """
-
-    feature_types = {
-        'object' : _str_feature,
-        'int64' : _int64_feature,
-        'float64' : _float_feature
-    }
-
-    features = {'X' : _bytes_feature(X),
-                'y' : _int64_feature(y)}
-
-    for colname, dtype in zip(df.columns, df.dtypes):
-        features[colname] = feature_types[dtype.name](row[colname])
-    
-    return tf.train.Example(features=tf.train.Features(feature=features))
-
-def construct_feature_description(dataset):
-
-    description = {
-        'bytes' : tf.io.FixedLenFeature([], tf.string),
-        'int64' : tf.io.FixedLenFeature([], tf.int64),
-        'float' : tf.io.FixedLenFeature([], tf.float32)
-    }
-
-    for raw_record in dataset.take(1):
-        example = tf.train.Example()
-        example.ParseFromString(raw_record.numpy())
-        break
-
-    image_feature_description = {}
-
-    features = list(example.features.feature)
-    for feature in features:
-        unserial_info = str(example.features.feature[feature]).split('_')[0]
-        image_feature_description[feature] = description[unserial_info]
-
-    return image_feature_description

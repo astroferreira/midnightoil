@@ -1,0 +1,42 @@
+basePath: /home/ferreira/projects/def-sellison/ferreira/CFISML/
+trainingPlan:
+    runName: 'Bickley2021'
+    epochs: 1000
+    initialEpoch: 0
+    batchSize: 32
+    dataPath: /home/ferreira/projects/def-sellison/ferreira/CFISML/datasets/partial_train_CFIS
+    evalPath: /home/ferreira/projects/def-sellison/ferreira/CFISML/datasets/partial_test_CFIS 
+    tfrecordsColumns: ['y']
+    optmization: false
+    distributed: false
+    train_size: 67161
+    test_size: 7448
+
+learningRateScheduler:
+    scheduler: WarmUpCosine
+    warmupEpochs: 20
+    cycleEpochs: 120
+    lowerLR: 1.0e-4
+    upperLR: 1.0e-3
+
+modelName: 'EfficientNetB0'
+model:
+    name: 'B0'
+    classification: true
+    dropout: 0.0
+
+augmentation:
+    num_layers: 2
+    flip: 1.0
+    rotate90: 1.0
+    rotate: 0.7
+    shear_x: 0.7
+    shear_y: 0.7
+    oclusion: 0.7
+    zoom: 0.0
+
+
+metrics: ['accuracy']
+optimizer: NesterovSGDCA
+loss: 'binary_crossentropy'
+from-epoch: 0

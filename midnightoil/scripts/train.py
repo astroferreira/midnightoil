@@ -12,27 +12,21 @@ fileformat = logging.Formatter('%(levelname)s:%(message)s', datefmt="%H:%M:%S")
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-file = logging.FileHandler(f'runs/{current_run}/debug.log')
+file = logging.FileHandler(f'{config["basePath"]}/runs/{current_run}/debug.log')
 file.setLevel(logging.DEBUG)
 file.setFormatter(fileformat)
 
 logger.addHandler(file)
-
-
-
-
-
 
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.python.keras.callbacks import TensorBoard, CSVLogger, ModelCheckpoint, LearningRateScheduler, EarlyStopping 
 
 from midnightoil.callbacks.confusionmatrix import ConfusionMatrixCallback
+from midnightoil.callbacks.regression import RegressionCallback
 from midnightoil.callbacks.learningrate import LRTensorBoard
+from midnightoil.callbacks.tfdatadebugger import TFDataDebugger
 from midnightoil.training.planner import TrainingPlanner
-
-
-
 
 runPath = f"{config['basePath']}/runs/{current_run}/"
 logDir = f"{config['basePath']}/logs/scalars/{current_run}"
@@ -43,13 +37,13 @@ logDir = f"{config['basePath']}/logs/scalars/{current_run}"
 """
 csv_logger = CSVLogger(f"{runPath}/training.csv", append=True, separator=';')
 tensorboard_callback = keras.callbacks.TensorBoard(log_dir=logDir)
-checkpoint_callback = ModelCheckpoint(f'{runPath}/checkpoints/' + '{val_accuracy:.4}_{epoch:03d}.ckpt', 'val_accuracy', mode='max', save_best_only=True, save_weights_only=True)
+checkpoint_callback = ModelCheckpoint(f'{runPath}/checkpoints/' + '{val_loss:.4}_{epoch:03d}.ckpt', 'val_loss', mode='min', save_best_only=True, save_weights_only=True)
 
-callbacks = [csv_logger, tensorboard_callback, LRTensorBoard(log_dir=logDir), checkpoint_callback]
+callbacks = [checkpoint_callback]#[csv_logger, tensorboard_callback, LRTensorBoard(log_dir=logDir), checkpoint_callback]
 
 if args.resume_run:
 
-    checkpoint_dir = f'runs/{current_run}/checkpoints/'
+    checkpoint_dir = f'{config["basePath"]}/runs/{current_run}/checkpoints/'
     initial_epoch = config['trainingPlan']['from-epoch']
 
     #if config['from-epoch'] == 0:
@@ -81,7 +75,8 @@ else:
     tPlanner.model.summary()
 
 tPlanner.loadData(training=True)
-#cmcallback = ConfusionMatrixCallback(tPlanner.model, tPlanner.test_dataset)
+#tfdebugger = TFDataDebugger(tPlanner)
+#cmcallback = RegressionCallback(tPlanner.model, tPlanner.test_dataset)
 #tPlanner.callbacks.append(cmcallback)
 tPlanner.train()
 

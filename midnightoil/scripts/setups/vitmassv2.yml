@@ -1,0 +1,48 @@
+basePath: /home/ferreira/projects/def-sellison/ferreira/CFISML/
+trainingPlan:
+    runName: 'ViT'
+    epochs: 300
+    initialEpoch: 0
+    batchSize: 16
+    dataPath: /home/ferreira/projects/def-sellison/ferreira/CFISML/datasets/MassRatiosREGv2/train
+    evalPath: /home/ferreira/projects/def-sellison/ferreira/CFISML/datasets/MassRatiosREGv2/val
+    tfrecordsColumns: ['y']
+    optmization: false
+    distributed: false
+    train_size: 195012
+    test_size: 50076
+    from-epoch: 0
+
+learningRateScheduler:
+    scheduler: WarmUpCosine
+    warmupEpochs: 30
+    cycleEpochs: 120
+    lowerLR: 1.0e-6
+    upperLR: 1.0e-3
+
+modelName: 'SwinTransformer'
+model:
+    name: 'SwinTransformer'
+    include_top: true
+    input_size: [128, 128]
+    patch_size: 4
+    channels: 1
+    num_classes: 1
+    embed_dim: 12
+    window_size: 4
+    mlp_ratio: 4        
+    qkv_bias: false
+    qk_scale: false
+    drop_rate: 0.0 
+    attn_drop_rate: 0.0 
+    drop_path_rate: 0.0
+    ape: true
+    patch_norm: true
+    depths: [2,2,6,2]
+    num_heads: [2, 4, 6, 12]
+    classification: false
+    
+metrics: ['mse']
+optimizer: AdamWCA
+loss: 'msle'
+from-epoch: 0

@@ -1,11 +1,11 @@
 basePath: /home/ferreira/projects/def-sellison/ferreira/CFISML/
 trainingPlan:
     runName: 'ViT'
-    epochs: 1000
+    epochs: 300
     initialEpoch: 0
-    batchSize: 256
-    dataPath: /home/ferreira/projects/def-sellison/ferreira/CFISML/partial_train_CFIS
-    evalPath: /home/ferreira/projects/def-sellison/ferreira/CFISML/partial_test_CFIS
+    batchSize: 128
+    dataPath: /home/ferreira/projects/def-sellison/ferreira/CFISML/datasets/partial_train_CFIS
+    evalPath: /home/ferreira/projects/def-sellison/ferreira/CFISML/datasets/partial_test_CFIS
     tfrecordsColumns: ['y']
     optmization: false
     distributed: false
@@ -16,19 +16,19 @@ trainingPlan:
 learningRateScheduler:
     scheduler: WarmUpCosine
     warmupEpochs: 20
-    cycleEpochs: 120
-    lowerLR: 1.0e-5
-    upperLR: 1.0e-3
+    cycleEpochs: 100
+    lowerLR: 1.0e-4
+    upperLR: 1.0e-2
 
 modelName: 'SwinTransformer'
 model:
-    model_name: 'swin_large'
+    name: 'swin_micro_v2'
     include_top: true
     input_size: [128, 128]
     patch_size: 4
     channels: 1
     num_classes: 2
-    embed_dim: 24
+    embed_dim: 96
     window_size: 8
     mlp_ratio: 4
     qkv_bias: true
@@ -39,18 +39,20 @@ model:
     ape: false
     patch_norm: true
     depths: [2, 2, 6, 2]
-    num_heads: [1, 3, 6, 12]
+    num_heads: [1, 4, 6, 12]
     classification: true
 
 augmentation:
-    flip: 0.5
-    rotate90: 0.5
-    rotate: 0.5
-    shear_x: 0.0
-    shear_y: 0.0
-    oclusion: 0.5
+    num_layers: 2
+    flip: 1.0
+    rotate90: 1.0
+    rotate: 0.7
+    shear_x: 0.7
+    shear_y: 0.7
+    oclusion: 0.7
+    zoom: 0.0
 
 metrics: ['accuracy']
-optimizer: AdamW
-loss: 'BinaryCrossentropyLS'
+optimizer: NesterovSGD
+loss: 'binary_crossentropy'
 from-epoch: 0

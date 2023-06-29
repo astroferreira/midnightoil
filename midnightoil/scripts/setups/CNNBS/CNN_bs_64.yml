@@ -1,0 +1,41 @@
+basePath: /home/ferreira/projects/def-sellison/ferreira/CFISML/
+trainingPlan:
+    runName: 'Bickley2021'
+    epochs: 200
+    initialEpoch: 0
+    batchSize: 64
+    dataPath: /home/ferreira/projects/def-sellison/ferreira/CFISML/datasets/partial_train_CFIS
+    evalPath: /home/ferreira/projects/def-sellison/ferreira/CFISML/datasets/partial_test_CFIS 
+    tfrecordsColumns: ['y']
+    optmization: false
+    distributed: false
+    train_size: 67161
+    test_size: 7448
+
+learningRateScheduler:
+    scheduler: WarmUpCosine
+    warmupEpochs: 20
+    cycleEpochs: 120
+    lowerLR: 1.0e-5
+    upperLR: 1.0e-3
+
+modelName: 'BICKLEY'
+model:
+    name: 'Bickley_bs_64'
+    classification: true
+    dropout: 0.2
+
+augmentation:
+    num_layers: 2
+    flip: 0.5
+    rotate90: 0.5
+    rotate: 0.5
+    shear_x: 0.0
+    shear_y: 0.0
+    oclusion: 0.5
+    zoom: 0.0
+
+metrics: ['accuracy']
+optimizer: Adadelta
+loss: 'binary_crossentropy'
+from-epoch: 0

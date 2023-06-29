@@ -1,0 +1,58 @@
+basePath: /home/ferreira/projects/def-sellison/ferreira/CFISML/
+trainingPlan:
+    runName: 'ViT'
+    epochs: 300
+    initialEpoch: 0
+    batchSize: 32
+    dataPath: /home/ferreira/projects/def-sellison/ferreira/CFISML/datasets/partial_train_CFIS
+    evalPath: /home/ferreira/projects/def-sellison/ferreira/CFISML/datasets/partial_test_CFIS
+    tfrecordsColumns: ['y']
+    optmization: false
+    distributed: false
+    train_size: 67161
+    test_size: 7448
+    from-epoch: 0
+
+learningRateScheduler:
+    scheduler: WarmUpCosine
+    warmupEpochs: 20
+    cycleEpochs: 120
+    lowerLR: 1.0e-4
+    upperLR: 1.0e-2
+
+modelName: 'SwinTransformer'
+model:
+    name: 'swinv2_small'
+    include_top: true
+    input_size: [128, 128]
+    patch_size: 4
+    channels: 1
+    num_classes: 1
+    embed_dim: 48
+    window_size: 4
+    mlp_ratio: 4
+    qkv_bias: false
+    qk_scale: false
+    drop_rate: 0.1
+    attn_drop_rate: 0.1
+    drop_path_rate: 0.1
+    ape: false
+    patch_norm: true
+    depths: [2,2,6,2]
+    num_heads: [1, 2, 6, 12]
+    classification: true
+
+augmentation:
+    num_layers: 2
+    flip: 1.0
+    rotate90: 1.0
+    rotate: 0.7
+    shear_x: 0.7
+    shear_y: 0.7
+    oclusion: 0.7
+    zoom: 0.0
+
+metrics: ['accuracy']
+optimizer: AdamWCA
+loss: 'binary_crossentropy'
+from-epoch: 0

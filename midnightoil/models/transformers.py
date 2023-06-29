@@ -1,7 +1,9 @@
 import numpy as np
 import optuna
 import tensorflow as tf
-from tensorflow.keras.layers import Dense, Dropout, Conv2D, LayerNormalization, GlobalAveragePooling1D, Resizing
+from tensorflow.keras.layers import Flatten, Dense, Dropout, Conv2D, LayerNormalization, GlobalAveragePooling1D, Resizing
+
+import coral_ordinal as coral
 
 CFGS = {
     'swin_large': dict(input_size=(64, 64), window_size=8, embed_dim=96, depths=[2, 2, 18, 2], num_heads=[3, 6, 12, 24]),
@@ -114,7 +116,6 @@ class WindowAttention(tf.keras.layers.Layer):
             attn = tf.nn.softmax(attn, axis=-1)
 
         attn = self.attn_drop(attn)
-
         x = tf.transpose((attn @ v), perm=[0, 2, 1, 3])
         x = tf.reshape(x, shape=[-1, N, C])
         x = self.proj(x)
@@ -173,6 +174,7 @@ class SwinTransformerBlock(tf.keras.layers.Layer):
         mlp_hidden_dim = int(dim * mlp_ratio)
         self.mlp = Mlp(in_features=dim, hidden_features=mlp_hidden_dim,
                        drop=drop, prefix=self.prefix)
+   
 
     def build(self, input_shape):
         if self.shift_size > 0:
@@ -407,10 +409,12 @@ class SwinTransformerModel(tf.keras.Model):
                                                 prefix=f'layers{i_layer}') for i_layer in range(self.num_layers)])
         self.norm = norm_layer(epsilon=1e-5, name='norm')
         self.avgpool = GlobalAveragePooling1D()
+        #self.flatten = Flatten()
         if self.include_top:
             if self.classification:
-                self.head = Dense(num_classes, activation='sigmoid', name='head')
+                self.head = Dense(num_classes, activation='softmax', name='head')
             else:
+                self.prehead = Dense(128, activation='linear', name='head')
                 self.head = Dense(num_classes, activation='linear', name='head')
         else:
             self.head = None
@@ -423,12 +427,15 @@ class SwinTransformerModel(tf.keras.Model):
 
         x = self.basic_layers(x)
         x = self.norm(x)
+        #x = self.flatten(x)
         x = self.avgpool(x)
         return x
 
     def call(self, x):
         x = self.forward_features(x)
+        x = Dropout(0.1)(x)
         if self.include_top:
+            #x = self.prehead(x)
             x = self.head(x)
         return x
 
@@ -437,7 +444,7 @@ def SwinTransformer(cfg):
     
     #build model from config file
     net = SwinTransformerModel(
-        model_name=cfg['model_name'], include_top=cfg['include_top'], qk_scale=cfg['qk_scale'],
+        model_name=cfg['name'], include_top=cfg['include_top'], qk_scale=cfg['qk_scale'],
         num_classes=cfg['num_classes'], img_size=cfg['input_size'], qkv_bias=cfg['qkv_bias'],
         patch_size=(cfg['patch_size'], cfg['patch_size']), mlp_ratio=cfg['mlp_ratio'],
         window_size=cfg['window_size'], embed_dim=cfg['embed_dim'], attn_drop_rate=cfg['attn_drop_rate'],
@@ -452,6 +459,26 @@ def SwinTransformer(cfg):
 
     return net
 
+def CORN_Swin(cfg):
+
+    inputs = tf.keras.Input(shape=(cfg['input_size'][0], cfg['input_size'][1], cfg['channels']))
+
+    net = SwinTransformerModel(
+        model_name=cfg['name'], include_top=cfg['include_top'], qk_scale=cfg['qk_scale'],
+        num_classes=cfg['num_classes'], img_size=cfg['input_size'], qkv_bias=cfg['qkv_bias'],
+        patch_size=(cfg['patch_size'], cfg['patch_size']), mlp_ratio=cfg['mlp_ratio'],
+        window_size=cfg['window_size'], embed_dim=cfg['embed_dim'], attn_drop_rate=cfg['attn_drop_rate'],
+        depths=cfg['depths'], num_heads=cfg['num_heads'], drop_path_rate=cfg['drop_path_rate'],
+        classification=cfg['classification'], patch_norm=cfg['patch_norm'], in_chans=cfg['channels'],
+        ape=cfg['ape']
+    )
+    
+    x = net(inputs)
+    outputs = coral.CoralOrdinal(num_classes = cfg['num_classes'])(x)
+
+    model = tf.keras.models.Model(inputs, outputs, name='EB0_ViT')
+
+    return model
 
 def SwinTransformerOpt(trial):
 
