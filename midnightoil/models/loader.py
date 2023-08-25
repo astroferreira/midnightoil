@@ -4,7 +4,7 @@ from .ferreira2020 import FERREIRA2020Net
 from .bickley2021 import bickley2021
 from .efficientnet import ENB0, CORN_B0
 from .transformersv2 import SwinTransformerv2
-
+from .transformersv3 import SwinV3
 
 models_list = {
     'MergeNeXt' : createMergenext,
@@ -15,7 +15,8 @@ models_list = {
     'BICKLEY'  : bickley2021,
     'EfficientNetB0': ENB0,
     'EfficientCornB0' :  CORN_B0,
-    'CORN_SWIN' : CORN_Swin
+    'CORN_SWIN' : CORN_Swin,
+    'SwinV3' : SwinV3
 }
 
 def get_model(name, config):

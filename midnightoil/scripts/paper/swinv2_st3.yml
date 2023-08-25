@@ -2,43 +2,43 @@ trainingPlan:
     runName: 'ViT'
     epochs: 5
     initialEpoch: 0
-    batchSize: 512
+    batchSize: 1536
     dataPath: TNG2023_32/train
     evalPath: TNG2023_32/test
-    tfrecordsColumns: ['y']
+    tfrecordsColumns: 'merger_bin_label'
     optmization: false
     distributed: false
-    train_size: 6471610
-    test_size: 744800
+    train_size: 2924720
+    test_size: 731280
     from-epoch: 0
 
 learningRateScheduler:
     scheduler: WarmUpCosine
     warmupEpochs: 10
-    cycleEpochs: 20
-    lowerLR: 1.0e-5
-    upperLR: 1.0e-3
+    cycleEpochs: 50
+    lowerLR: 1.0e-6
+    upperLR: 1.0e-4
 
-modelName: 'SwinTransformer'
+modelName: 'SwinV3'
 model:
-    name: 'swinv2_base'
+    name: 'SwinV3_STAGE3'
     include_top: true
     input_size: [128, 128]
     patch_size: 4
     channels: 1
     num_classes: 2
-    embed_dim: 96
+    embed_dim: 24
     window_size: 4
     mlp_ratio: 4
     qkv_bias: false
     qk_scale: false
     drop_rate: 0.1
-    attn_drop_rate: 0.1
-    drop_path_rate: 0.1
-    ape: false
+    attn_drop_rate: 0.0
+    drop_path_rate: 0.0
+    ape: true
     patch_norm: true
-    depths: [2,2,6,2]
-    num_heads: [1, 2, 6, 12]
+    depths: [2, 2, 4, 2]
+    num_heads: [2, 2, 6, 6]
     classification: true
 
 augmentation:
@@ -52,6 +52,6 @@ augmentation:
     zoom: 0.0
 
 metrics: ['accuracy']
-optimizer: AdamWCA
+optimizer: LionCA
 loss: 'binary_crossentropy'
 from-epoch: 0

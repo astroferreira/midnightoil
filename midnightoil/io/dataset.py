@@ -7,29 +7,24 @@ import os
 SLURM_TMPDIR = os.getenv('SLURM_TMPDIR')
 
 from .recordshandler import construct_feature_description, parse
-from ..augmentation import augment, flip, rotate, rotate90, oclusion, shear_x, shear_y, zoom, shear, MixUp
+from ..augmentation import augment, zoom, shear
 
 import glob
 
 RNG = tf.random.Generator.from_seed(1331)
 
-augmentations_fns = {
-        'flip': flip,
-        'rotate90' : rotate90,
-        'rotate' : rotate,
-        'shear_x' : shear_x,
-        'shear_y' : shear_y,
-        'oclusion' : oclusion
-}
-
-def build_TFRecordDataset(path, columns, with_rootnames=False, model_cfg=None):
+def build_TFRecordDataset(path, columns='y', training=False, with_rootnames=False, model_cfg=None):
+    """
+        Loads the tfrecord files in parallel and build the header
+    """
     
     files = sorted(glob.glob(path))
-    #shuffle shards
-    ds_files = tf.data.Dataset.from_tensor_slices(files)
-    dataset = ds_files.shuffle(len(files)).interleave(lambda x: tf.data.TFRecordDataset(x,  num_parallel_reads=tf.data.AUTOTUNE))
+    if training:
+        ds_files = tf.data.Dataset.from_tensor_slices(files)
+        dataset = ds_files.shuffle(len(files)).interleave(lambda x: tf.data.TFRecordDataset(x,  num_parallel_reads=tf.data.AUTOTUNE))
+    else:
+        dataset = tf.data.TFRecordDataset(files)
 
-    #dataset = tf.data.TFRecordDataset(ds_files, num_parallel_reads=tf.data.AUTOTUNE)
     image_feature_description = construct_feature_description(dataset)
     map_function = parse(image_feature_description, columns=columns, with_labels=True, with_rootnames=with_rootnames, model_cfg=model_cfg)
     
@@ -38,27 +33,30 @@ def build_TFRecordDataset(path, columns, with_rootnames=False, model_cfg=None):
     return dataset
 
 
-def load_dataset(path, epochs, columns=['y'],
-                 training=False, batch_size=128, 
-                 buffer_size=18000, augmentations=None,
-                 with_rootnames=False, model_cfg=None):
 
+def load_dataset(path, epochs, columns='y',
+                 training=False, batch_size=128, 
+                 buffer_size=18000, with_rootnames=False,
+                 model_cfg=None):
+    """
+        Loads the tfrecords into a tf.TFRecordDataset.
+        
+        If the training set is loaded this way it shuffles it, 
+        applies the augmentations for each image individually and then
+        generates batches of it. These steps are running in parallel with
+        the help of the map function.
+    """
+    print(path)  
     dataset = build_TFRecordDataset(path, columns, with_rootnames=with_rootnames, model_cfg=model_cfg)
     
-    if training:
-        
+    if training:  
         dataset = dataset.shuffle(20000)
-        #dataset = dataset.cache()
-        dataset = dataset.repeat(epochs)
+        dataset = dataset.repeat(epochs+10)
         dataset = dataset.map(augment, num_parallel_calls=tf.data.AUTOTUNE)
         dataset = dataset.map(shear, num_parallel_calls=tf.data.AUTOTUNE)
         dataset = dataset.map(zoom, num_parallel_calls=tf.data.AUTOTUNE)
         dataset = dataset.batch(batch_size, drop_remainder=True)
-        dataset = dataset.prefetch(8)
-        #dataset = dataset.map(oclusion, num_parallel_calls=tf.data.AUTOTUNE)
-          
-        #dataset = dataset.map(lambda x, y: tf.cond(tf.less(RNG.uniform((1,), 0, 1), 0.5), lambda: oclusion(x, y), lambda: (x, y)),num_parallel_calls=tf.data.AUTOTUNE)
-    
+        dataset = dataset.prefetch(tf.data.AUTOTUNE)
     else:
         dataset = dataset.batch(batch_size, drop_remainder=True)
         
@@ -78,6 +76,14 @@ def load_latest_weights(tPlanner, config, args, current_run, runPath):
     tPlanner.model.load_weights(latest).expect_partial()
     return tPlanner
 
+def list_all_checkpoints(runPath):
+    checkpoint_dir = f'{runPath}/checkpoints/*.index'
+    ckpts = [f.split('.index')[0] for f in sorted(glob.glob(checkpoint_dir))]
+    print(ckpts)
+    return ckpts
+    
+
+
 def single_band(x, y):
     return x[:,:,:, 0:1], y
 
@@ -92,14 +98,17 @@ def unravel_dataset(tPlanner, batch_size=512):
     preds = []
     tPlanner.loadData(training=False, batchSize=batch_size, with_rootnames=True)
     for i, ex in enumerate(tPlanner.test_dataset):
-        print(i*batch_size)
+        print(100*((i/(744800//batch_size))))
         X = ex[0]
         y = ex[1]
         r = ex[2]
         preds.append(tPlanner.model.predict(X))
         trues.append(y)
         rootnames.append(r)
-
+        #print(y)
+        #print(preds[-1])
+        cm = tf.math.confusion_matrix(np.argmax(np.array(np.concatenate(trues)), axis=1), np.argmax(np.array(np.concatenate(preds)), axis=1)).numpy()
+        print(cm / cm.sum(axis=1, keepdims=True))
         #imgs.append(X.numpy())
 
 

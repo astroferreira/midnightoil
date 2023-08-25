@@ -1,4 +1,6 @@
-from tensorflow.keras.optimizers.experimental import SGD, AdamW, Adam, Adadelta
+from tensorflow.keras.optimizers.experimental import SGD, AdamW, Adam, Adadelta#, Lion
+from .lion_opt import Lion
+#from tensorflow.keras.optimizers import Lion
 
 def load_optimizer(name, lrs):
 
@@ -9,7 +11,8 @@ def load_optimizer(name, lrs):
         'Adam': Adam(learning_rate=lrs),
         'AdamWCA': AdamW(learning_rate=lrs),
         'AdamW': AdamW(learning_rate=0.05),
-        'Adadelta': Adadelta(learning_rate=0.05)
+        'Adadelta': Adadelta(learning_rate=0.05),
+        'LionCA' : Lion(learning_rate=lrs)
     }
 
     return optimizers_list[name]

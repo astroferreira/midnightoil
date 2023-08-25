@@ -1,29 +1,35 @@
-import tensorflow as tf 
-import numpy as np
 import math
-import pandas as pd
 import glob
+
+import numpy as np
+import pandas as pd
+import tensorflow as tf 
+
 from scipy.ndimage import zoom
 
-
-def parse(image_feature_description, columns='y', with_labels=True, with_rootnames=False, model_cfg=None):
+def parse(image_feature_description, columns, with_labels=True, with_rootnames=False, model_cfg=None):
 
     def _parser(ep):
 
-        example = tf.io.parse_single_example(ep, image_feature_description)
-        image = tf.io.decode_raw(example['X'], out_type=np.float64)
+        """
+            Parses an example from a TFRecord to the format we expect
+        """
 
+        example = tf.io.parse_single_example(ep, image_feature_description)
+        image = tf.io.decode_raw(example['X'], out_type=np.float32)
+
+        # input dimensions
         if model_cfg is None:
-            input_shape = (128, 128, 1)
+            input_shape = (128, 128, 1) 
         else:
             input_shape = (model_cfg['input_size'][0], model_cfg['input_size'][1], model_cfg['channels'])    
         
         image = tf.reshape(image, input_shape)
-        labels = tf.one_hot(tf.cast(example[columns], dtype=tf.int64), depth=2)
-                        
+        labels = tf.one_hot(tf.cast(example['y'], dtype=tf.int64), depth=2)
+                                
         if with_labels:
             if with_rootnames:
-                return image, labels, example['DB_ID']#, example['mock_camera'], example['mock_redshift']
+                return image, labels, example['DB_ID']
             else:
                 return image, labels
         
@@ -32,9 +38,6 @@ def parse(image_feature_description, columns='y', with_labels=True, with_rootnam
     return _parser
 
 
-"""
-    These function below are used to generate tfrecord files, they are not used to read them
-"""
 def construct_feature_description(dataset):
 
     description = {

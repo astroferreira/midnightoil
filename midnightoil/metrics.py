@@ -3,6 +3,7 @@ import tensorflow as tf
 from coral_ordinal import MeanAbsoluteErrorLabels
 
 metrics_list = {
+    'categorical_accuracy' : 'categorical_accuracy',
     'accuracy' : 'accuracy',
     'MAELabels' : MeanAbsoluteErrorLabels(),
     'mse' : 'mean_squared_error'

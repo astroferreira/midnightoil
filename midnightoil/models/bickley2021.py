@@ -30,7 +30,7 @@ def bickley2021(cfg):
     x = Dropout(cfg['dropout'],name='DropFCL_1')(x)
     x = Dense(128,activation='relu',name='Dense_2')(x)
     x = Dropout(cfg['dropout'],name='DropFCL_2')(x)
-    outputs = Dense(1,activation='sigmoid',name='Dense_3')(x)
+    outputs = Dense(2,activation='sigmoid',name='Dense_3')(x)
 
     # connect and compile
     model = Model(inputs=inputs,outputs=outputs)

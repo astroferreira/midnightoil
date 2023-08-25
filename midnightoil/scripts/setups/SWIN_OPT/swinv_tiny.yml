@@ -1,22 +1,22 @@
-basePath: /home/ferreira/projects/def-sellison/ferreira/CFISML/
 trainingPlan:
     runName: 'ViT'
-    epochs: 300
+    epochs: 5
     initialEpoch: 0
-    batchSize: 64
-    dataPath: /home/ferreira/projects/rrg-jfncc/ferreira/datasets/TNG2023/train/
-    evalPath: /home/ferreira/projects/rrg-jfncc/ferreira/datasets/TNG2023/test/
+    batchSize: 512
+    dataPath: TNG2023_32/train
+    evalPath: TNG2023_32/test
     tfrecordsColumns: ['y']
     optmization: false
     distributed: false
-    train_size: 647161
-    test_size: 74480
+    train_size: 6471610
+    test_size: 744800
     from-epoch: 0
+
 
 learningRateScheduler:
     scheduler: WarmUpCosine
-    warmupEpochs: 20
-    cycleEpochs: 120
+    warmupEpochs: 10
+    cycleEpochs: 20
     lowerLR: 1.0e-5
     upperLR: 1.0e-3
 

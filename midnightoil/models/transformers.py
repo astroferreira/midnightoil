@@ -17,7 +17,6 @@ CFGS = {
     'swin_large_384': dict(input_size=(384, 384), window_size=12, embed_dim=192, depths=[2, 2, 18, 2], num_heads=[6, 12, 24, 48])
 }
 
-
 class Mlp(tf.keras.layers.Layer):
     def __init__(self, in_features, hidden_features=None, out_features=None, drop=0., prefix=''):
         super().__init__()

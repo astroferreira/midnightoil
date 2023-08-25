@@ -15,41 +15,23 @@ tf.autograph.set_verbosity(1)
 from tensorflow import keras
 from tensorflow.python.keras.callbacks import TensorBoard, CSVLogger, ModelCheckpoint, LearningRateScheduler, EarlyStopping 
 
-from midnightoil.io.dataset import load_latest_weights, unravel_dataset
+from midnightoil.io.dataset import load_latest_weights, unravel_dataset, list_all_checkpoints
 from midnightoil.io.images import mosaic
 from midnightoil.training.planner import TrainingPlanner
 
 import coral_ordinal as coral
 
-runPath = f"{config['basePath']}/runs/{current_run}/"
-logDir = f"{config['basePath']}/logs/scalars/{current_run}"
+runPath = f"/home/ferreira/scratch/runs/{current_run}/"
+logDir = f"/home/ferreira/scratch/logs/scalars/{current_run}"
 
 
-tPlanner = TrainingPlanner(config, currentRun=current_run)
+tPlanner = TrainingPlanner(config, currentRun=current_run, callbacks=[])
 tPlanner = load_latest_weights(tPlanner, args, config, current_run, runPath)
 print('Loading dataset')
-#predictions = tPlanner.model.predict(tPlanner.test_dataset)
-#np.save(f'{runPath}/predictions.npy', predictions)
 
-trues, preds, rootnames = unravel_dataset(tPlanner)
-
-print(trues)
-print(preds)
-
-print(trues.shape, preds.shape)
-#mosaic(tPlanner.test_dataset)
-np.save(f'{runPath}/trues.npy', trues)
-np.save(f'{runPath}/preds.npy', preds)
-np.save(f'{runPath}/rootnames.npy', rootnames)
-
-#preds_ordinal = coral.ordinal_softmax(preds)
-#np.save(f'{runPath}/preds.npy', preds_ordinal)
-#print(preds_ordinal)
-#print(trues)
+tPlanner.loadData(training=False, batchSize=1536, with_rootnames=True)
+preds = tPlanner.model.predict(tPlanner.test_dataset)
+np.save(f"{runPath}/preds_mock_survey.npy", preds)
+np.save(f'{runPath}/mock_rootnames.npy', rootnames)
 
 
-cm = tf.math.confusion_matrix(np.argmax(trues, axis=1), np.argmax(preds, axis=1)).numpy()
-print(cm)
-print(cm / cm.sum(axis=1, keepdims=True))
-
-exit()

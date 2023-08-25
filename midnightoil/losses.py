@@ -8,7 +8,7 @@ def load_loss(name):
         'CategoricalCrossentropyLS' : CategoricalCrossentropy(label_smoothing=0.1),
         'BinaryCrossentropyLS' : BinaryCrossentropy(label_smoothing=0.15),
         'BinaryFocalCrossentropyLS' : BinaryFocalCrossentropy(label_smoothing=0.1),
-        'binary_crossentropy' : 'binary_crossentropy',
+        'binary_crossentropy' : BinaryCrossentropy(),
         'categorical_crossentropy' : 'categorical_crossentropy',
         'mse': MeanSquaredError(),
         'mae': MeanAbsoluteError(),

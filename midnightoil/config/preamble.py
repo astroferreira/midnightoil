@@ -5,6 +5,9 @@ import yaml
 import argparse
 import tensorflow as tf
 
+tf.keras.backend.set_floatx('float32')
+print(tf.keras.backend.floatx())
+
 from datetime import datetime 
 
 class Config(object):
@@ -35,7 +38,9 @@ def handle_args():
 
     config_name = args.config.split('/')[-1].split('.')[0]
     config = yaml.safe_load(open(args.config)) 
-    
+   
+    basePath = os.getcwd()
+
     print(args.dataset)
     if args.dataset is not None:
         print('TEST')
@@ -47,15 +52,14 @@ def handle_args():
     timestamp = datetime.now().strftime('%Y%m%d%H%M')
 
     if args.resume_run is None:
-        
-        runs = [str(f.split('/')[-1]) for f in sorted(glob.glob(f"{config['basePath']}/runs/*"))]
+        runs = [str(f.split('/')[-1]) for f in sorted(glob.glob(f"/home/ferreira/scratch/runs/*"))]
 
         if len(runs) > 0:
             current_run = f"{int(runs[-1].split('_')[0])+1:03}_{config['model']['name']}_{timestamp}"
         else:
             current_run = f"001_{config['model']['name']}_{timestamp}"
  
-        run_dirname = f"{config['basePath']}/runs/{current_run}"
+        run_dirname = f"/home/ferreira/scratch/runs/{current_run}"
         if not os.path.exists(run_dirname):
             os.makedirs(run_dirname)
             os.makedirs(run_dirname + '/checkpoints')
@@ -64,7 +68,7 @@ def handle_args():
                     documents = yaml.dump(config, file)
 
     else:
-        current_run = [f.split('/')[-1] for f in sorted(glob.glob(f"{config['basePath']}/runs/{args.resume_run}*"))][0]
+        current_run = [f.split('/')[-1] for f in sorted(glob.glob(f"/home/ferreira/scratch/runs/{args.resume_run}*"))][0]
         print(f'Resuming {current_run}')
 
     
