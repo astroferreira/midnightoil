@@ -13,7 +13,7 @@ import glob
 
 RNG = tf.random.Generator.from_seed(1331)
 
-def build_TFRecordDataset(path, columns='y', training=False, with_rootnames=False, model_cfg=None):
+def build_TFRecordDataset(path, columns='y', training=False, with_rootnames=False, model_cfg=None, mock_survey=False):
     """
         Loads the tfrecord files in parallel and build the header
     """
@@ -26,7 +26,7 @@ def build_TFRecordDataset(path, columns='y', training=False, with_rootnames=Fals
         dataset = tf.data.TFRecordDataset(files)
 
     image_feature_description = construct_feature_description(dataset)
-    map_function = parse(image_feature_description, columns=columns, with_labels=True, with_rootnames=with_rootnames, model_cfg=model_cfg)
+    map_function = parse(image_feature_description, columns=columns, with_labels=True, with_rootnames=with_rootnames, model_cfg=model_cfg, mock_survey=mock_survey)
     
     dataset = dataset.map(map_function)
 
@@ -37,7 +37,7 @@ def build_TFRecordDataset(path, columns='y', training=False, with_rootnames=Fals
 def load_dataset(path, epochs, columns='y',
                  training=False, batch_size=128, 
                  buffer_size=18000, with_rootnames=False,
-                 model_cfg=None):
+                 model_cfg=None, mock_survey=False):
     """
         Loads the tfrecords into a tf.TFRecordDataset.
         
@@ -47,7 +47,7 @@ def load_dataset(path, epochs, columns='y',
         the help of the map function.
     """
     print(path)  
-    dataset = build_TFRecordDataset(path, columns, with_rootnames=with_rootnames, model_cfg=model_cfg)
+    dataset = build_TFRecordDataset(path, columns, with_rootnames=with_rootnames, model_cfg=model_cfg, mock_survey=mock_survey)
     
     if training:  
         dataset = dataset.shuffle(20000)
@@ -67,13 +67,18 @@ def load_latest_weights(tPlanner, config, args, current_run, runPath):
     
     checkpoint_dir = f'{runPath}/checkpoints/'
 
-    latest = tf.train.latest_checkpoint(checkpoint_dir)
-    if latest is not None:
-        last_loss, epoch = latest.split('/')[-1].split('_')
-        epoch = int(epoch.split('.')[0])
+    if args.eval_epoch is not None:
+        checkpoint_dir = checkpoint_dir + f'0{args.eval_epoch}.ckpt'
+        tPlanner.model.load_weights(checkpoint_dir).expect_partial()
+    else:
+        latest = tf.train.latest_checkpoint(checkpoint_dir)
+        if latest is not None:
+            epoch = latest.split('/')[-1]#.split('_')
+            epoch = int(epoch.split('.')[0])
 
-    print(f'Loading weights from {latest}')
-    tPlanner.model.load_weights(latest).expect_partial()
+        print(f'Loading weights from {latest}')
+        tPlanner.model.load_weights(latest).expect_partial()
+    
     return tPlanner
 
 def list_all_checkpoints(runPath):

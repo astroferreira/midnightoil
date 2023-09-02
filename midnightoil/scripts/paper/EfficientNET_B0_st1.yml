@@ -5,7 +5,7 @@ trainingPlan:
     batchSize: 1536
     dataPath: TNG2023_32/train
     evalPath: TNG2023_32/test
-    tfrecordsColumns: ['y']
+    tfrecordsColumns: 'y'
     optmization: false
     distributed: false
     train_size: 2924720

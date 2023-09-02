@@ -6,7 +6,7 @@ def load_loss(name):
 
     loss_list = {
         'CategoricalCrossentropyLS' : CategoricalCrossentropy(label_smoothing=0.1),
-        'BinaryCrossentropyLS' : BinaryCrossentropy(label_smoothing=0.15),
+        'BinaryCrossentropyLS' : BinaryCrossentropy(label_smoothing=0.05),
         'BinaryFocalCrossentropyLS' : BinaryFocalCrossentropy(label_smoothing=0.1),
         'binary_crossentropy' : BinaryCrossentropy(),
         'categorical_crossentropy' : 'categorical_crossentropy',

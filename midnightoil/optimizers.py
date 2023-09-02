@@ -12,7 +12,8 @@ def load_optimizer(name, lrs):
         'AdamWCA': AdamW(learning_rate=lrs),
         'AdamW': AdamW(learning_rate=0.05),
         'Adadelta': Adadelta(learning_rate=0.05),
-        'LionCA' : Lion(learning_rate=lrs)
+        'LionCA' : Lion(learning_rate=lrs),
+        'Lion' : Lion(learning_rate=1.0e-4)
     }
 
     return optimizers_list[name]

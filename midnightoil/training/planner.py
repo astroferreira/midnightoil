@@ -105,7 +105,7 @@ class TrainingPlanner:
         self.model.compile(optimizer=self.optimizer, loss=self.loss,
                         metrics=self.metrics)
 
-    def loadData(self, training=True, batchSize=None, with_rootnames=False):
+    def loadData(self, training=True, batchSize=None, with_rootnames=False, mock_survey=False):
         
         ignore_order = tf.data.Options()
         ignore_order.experimental_deterministic = False
@@ -118,7 +118,7 @@ class TrainingPlanner:
                                                 columns=self.columns,
                                                 training=self.train_size,
                                                 batch_size=self.batchSize, 
-                                                model_cfg=self.config['model'])
+                                                model_cfg=self.config['model'], mock_survey=mock_survey)
         
             self.training_dataset = self.training_dataset.with_options(ignore_order) 
 
@@ -138,7 +138,8 @@ class TrainingPlanner:
                                             columns=self.columns,
                                             training=False,
                                             batch_size=batchSize,
-                                            with_rootnames=with_rootnames)
+                                            with_rootnames=with_rootnames,
+                                            mock_survey=mock_survey)
         
         self.test_dataset = self.test_dataset.with_options(ignore_order)
 

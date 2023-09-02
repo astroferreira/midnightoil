@@ -30,14 +30,16 @@ def handle_args():
     parser.add_argument('--GPUS', default='0,1,2,3')
     parser.add_argument('--eval', action='store_true')
     parser.add_argument('--tf_log_level', default='3')
-    parser.add_argument('--resume_run', default=None)
+    parser.add_argument('--resume_run', default=None, nargs='?', const=None)
     parser.add_argument('--from_epoch', default=0)
     parser.add_argument('--dataset', default=None)
+    parser.add_argument('--eval_epoch', default=None)
 
     args = parser.parse_args(sys.argv[1:])
 
     config_name = args.config.split('/')[-1].split('.')[0]
     config = yaml.safe_load(open(args.config)) 
+    #config['eval_epoch'] = args.eval_epoch
    
     basePath = os.getcwd()
 

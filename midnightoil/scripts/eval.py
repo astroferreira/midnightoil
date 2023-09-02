@@ -3,6 +3,8 @@
 from midnightoil.config.preamble import handle_args
 current_run, args, config = handle_args()
 
+
+
 import numpy as np
 import glob
 
@@ -26,11 +28,12 @@ logDir = f"/home/ferreira/scratch/logs/scalars/{current_run}"
 
 
 tPlanner = TrainingPlanner(config, currentRun=current_run, callbacks=[])
-tPlanner = load_latest_weights(tPlanner, args, config, current_run, runPath)
+tPlanner = load_latest_weights(tPlanner, config, args, current_run, runPath)
 print('Loading dataset')
 
-tPlanner.loadData(training=False, batchSize=1536, with_rootnames=True)
+tPlanner.loadData(training=False, batchSize=1536, with_rootnames=True, mock_survey=True)
 preds = tPlanner.model.predict(tPlanner.test_dataset)
+rootnames = tf.concat([ex[2] for ex in tPlanner.test_dataset], axis=0)
 np.save(f"{runPath}/preds_mock_survey.npy", preds)
 np.save(f'{runPath}/mock_rootnames.npy', rootnames)
 

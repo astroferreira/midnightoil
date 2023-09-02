@@ -5,11 +5,11 @@ trainingPlan:
     batchSize: 1536
     dataPath: TNG2023_32/train
     evalPath: TNG2023_32/test
-    tfrecordsColumns: 'merger_num_label'
+    tfrecordsColumns: 'y'
     optmization: false
     distributed: false
-    train_size: 2924720
-    test_size: 731280
+    train_size: 4995120
+    test_size: 1248800
     from-epoch: 0
 
 learningRateScheduler:
@@ -19,14 +19,27 @@ learningRateScheduler:
     lowerLR: 1.0e-6
     upperLR: 1.0e-4
 
-modelName: 'EfficientNetB0'
+modelName: 'SwinV3UltraTinyWS'
 model:
-    name: 'B0_STAGE2'
-    classification: true
-    dropout: 0.0
-    num_classes: 2
+    name: 'SwinV3_STAGE1_UltraTinyWS'
+    include_top: true
     input_size: [128, 128]
+    patch_size: 4
     channels: 1
+    num_classes: 2
+    embed_dim: 24
+    window_size: 4
+    mlp_ratio: 4
+    qkv_bias: false
+    qk_scale: false
+    drop_rate: 0.1
+    attn_drop_rate: 0.0
+    drop_path_rate: 0.0
+    ape: true
+    patch_norm: true
+    depths: [2, 2, 4, 2]
+    num_heads: [2, 2, 6, 6]
+    classification: true
 
 augmentation:
     num_layers: 2
@@ -38,8 +51,7 @@ augmentation:
     oclusion: 0.7
     zoom: 0.0
 
-
 metrics: ['accuracy']
 optimizer: LionCA
-loss: 'binary_crossentropy'
+loss: 'BinaryCrossentropyLS'
 from-epoch: 0

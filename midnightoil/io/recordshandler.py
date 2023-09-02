@@ -6,12 +6,16 @@ import glob
 from scipy.ndimage import zoom
 
 
-def parse(image_feature_description, columns='y', with_labels=True, with_rootnames=False, model_cfg=None):
+def parse(image_feature_description, columns='y', with_labels=True, with_rootnames=False, model_cfg=None, mock_survey=False):
 
     def _parser(ep):
 
         example = tf.io.parse_single_example(ep, image_feature_description)
-        image = tf.io.decode_raw(example['X'], out_type=np.float64)
+        
+        if mock_survey:
+            image = tf.io.decode_raw(example['X'], out_type=np.float64)
+        else:
+            image = tf.io.decode_raw(example['X'], out_type=np.float32)
 
         if model_cfg is None:
             input_shape = (128, 128, 1)
