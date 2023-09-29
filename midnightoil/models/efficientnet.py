@@ -10,19 +10,12 @@ def ENB0(cfg):
 
     inputs = Input(shape=(128, 128, 1))
 
-    model_eff = EfficientNetB0(include_top=False, input_tensor=inputs,
-                              weights=None)
-    x = GlobalAveragePooling2D()(model_eff.output)
-    x = Flatten()(x)
-    #x = BatchNormalization()(x)
+    model_eff = EfficientNetB0(include_top=True, pooling='avg', input_tensor=inputs,
+                              weights=None, classes=2, classifier_activation='sigmoid')
+    
+    #model = Model(inputs, model_eff.output, name='EB0_Classification')
 
-    x = Dense(128, activation='relu')(x)
-    x = Dropout(0.5)(x)
-    outputs = Dense(cfg['num_classes'], activation='softmax')(x)
-
-    model = Model(inputs, outputs, name='EB0_Classification')
-
-    return model
+    return model_eff
 
 
 def CORN_B0(cfg):

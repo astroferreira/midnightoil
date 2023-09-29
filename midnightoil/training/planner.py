@@ -112,8 +112,8 @@ class TrainingPlanner:
         print(f'EPOCHS = {self.epochs}')
 
         if training:
-            print(f'{self.basePath}/{self.dataPath}/*.tfrecords')
-            self.training_dataset = load_dataset(f'{self.basePath}/{self.dataPath}/*.tfrecords',
+            print(f'{self.basePath}/{self.dataPath}*.tfrecords')
+            self.training_dataset = load_dataset(f'{self.basePath}/{self.dataPath}*.tfrecords',
                                                 epochs=(self.epochs-self.initialEpoch),
                                                 columns=self.columns,
                                                 training=self.train_size,
@@ -130,7 +130,7 @@ class TrainingPlanner:
         dataPath = f'{self.dataPath}/val/*1-83.tfrecords'
 
         if self.evalPath is not False:
-            dataPath = f'{self.basePath}/{self.evalPath}/*.tfrecords'
+            dataPath = f'{self.basePath}/{self.evalPath}*.tfrecords'
 
 
 

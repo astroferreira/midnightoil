@@ -1,0 +1,45 @@
+trainingPlan:
+    runName: 'ViT'
+    epochs: 5
+    initialEpoch: 0
+    batchSize: 1024
+    dataPath: TNG2023_32/train/CFIS_2023_train_stage1_9
+    evalPath: TNG2023_32/test/
+    tfrecordsColumns: 'y'
+    optmization: false
+    distributed: false
+    train_size: 499512
+    test_size: 1248800
+    from-epoch: 0
+
+learningRateScheduler:
+    scheduler: WarmUpCosine
+    warmupEpochs: 10
+    cycleEpochs: 50
+    lowerLR: 1.0e-6
+    upperLR: 1.0e-4
+
+modelName: 'EfficientNetB0'
+model:
+    name: 'B0_STAGE1_9'
+    classification: true
+    dropout: 0.0
+    num_classes: 2
+    input_size: [128, 128]
+    channels: 1
+
+augmentation:
+    num_layers: 2
+    flip: 1.0
+    rotate90: 1.0
+    rotate: 0.7
+    shear_x: 0.7
+    shear_y: 0.7
+    oclusion: 0.7
+    zoom: 0.0
+
+
+metrics: ['accuracy']
+optimizer: Lion
+loss: 'binary_crossentropy'
+from-epoch: 0

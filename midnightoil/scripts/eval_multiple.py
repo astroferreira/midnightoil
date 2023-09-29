@@ -25,31 +25,35 @@ runPath = f"/home/ferreira/scratch/runs/{current_run}/"
 logDir = f"/home/ferreira/scratch/logs/scalars/{current_run}"
 
 
-ckpts = list_all_checkpoints(runPath)
-#tPlanner = load_latest_weights(tPlanner, args, config, current_run, runPath)
-print(ckpts)
+
+
+tPlanner = TrainingPlanner(config, currentRun=current_run, callbacks=[])
+tPlanner = load_latest_weights(tPlanner, config, args, current_run, runPath)
 print('Loading dataset')
 
-#trues, preds, rootnames = unravel_dataset(tPlanner, batch_size=1024)
-tPlanner = TrainingPlanner(config, currentRun=current_run)
 tPlanner.loadData(training=False, batchSize=1536, with_rootnames=False)
+preds = tPlanner.model.predict(tPlanner.test_dataset)
+#tPlanner.loadData(training=False, batchSize=1536, with_rootnames=True)
 #trues = tf.concat([ex[1] for ex in tPlanner.test_dataset], axis=0)
 #rootnames = tf.concat([ex[2] for ex in tPlanner.test_dataset], axis=0)
-##cameras = tf.concat([ex[3] for ex in tPlanner.test_dataset], axis=0)
+#cameras = tf.concat([ex[3] for ex in tPlanner.test_dataset], axis=0)
 #redshifts = tf.concat([ex[4] for ex in tPlanner.test_dataset], axis=0)
 
-#np.save(f'{runPath}/trues.npy', trues)
-#np.save(f'{runPath}/rootnames.npy', rootnames)
-#np.save(f'{runPath}/cameras.npy', cameras)
-#np.save(f'{runPath}/redshifts.npy', redshifts)
-#exit()
+np.save(f'{runPath}/predsv2.npy', preds)
+#np.save(f'{runPath}/truesv2.npy', trues)
+#np.save(f'{runPath}/rootnamesv2.npy', rootnames)
+#np.save(f'{runPath}/camerasv2.npy', cameras)
+#np.save(f'{runPath}/redshiftsv2.npy', redshifts)
+exit()
+
+"""
 for ckpt in ckpts:
     print(ckpt)
     print(f'Loading weights from {ckpt}')
     tPlanner.model.load_weights(ckpt).expect_partial()
     preds = tPlanner.model.predict(tPlanner.test_dataset)
     np.save(f"{runPath}/preds_{ckpt.split('/')[-1]}.npy", preds)
-
+"""
 #tPlanner.loadData(training=False, batchSize=512, with_rootnames=True)
 #trues = tf.concat([ex[1] for ex in tPlanner.test_dataset], axis=0)
 #rootnames = tf.concat([ex[2] for ex in tPlanner.test_dataset], axis=0)

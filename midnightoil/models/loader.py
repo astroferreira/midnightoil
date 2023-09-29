@@ -4,7 +4,7 @@ from .ferreira2020 import FERREIRA2020Net
 from .bickley2021 import bickley2021
 from .efficientnet import ENB0, CORN_B0
 from .transformersv2 import SwinTransformerv2
-from .transformersv3 import SwinV3, SwinV3UltraTiny, SwinV3UltraTinyWS
+from .transformersv3 import SwinV3, SwinV3UltraTiny, SwinV3UltraTinyWS, SwinV3Config, SwinV3Config2
 
 
 models_list = {
@@ -19,7 +19,9 @@ models_list = {
     'CORN_SWIN' : CORN_Swin,
     'SwinV3' : SwinV3,
     'SwinV3UltraTiny' : SwinV3UltraTiny,
-    'SwinV3UltraTinyWS' : SwinV3UltraTinyWS
+    'SwinV3UltraTinyWS' : SwinV3UltraTinyWS,
+    'SwinV3Config' : SwinV3Config,
+    'SwinV3Config2' : SwinV3Config2
 }
 
 def get_model(name, config):

@@ -3,25 +3,25 @@ trainingPlan:
     epochs: 5
     initialEpoch: 0
     batchSize: 1536
-    dataPath: TNG2023_32/train
-    evalPath: TNG2023_32/test
+    dataPath: TNG2023_32/train/CFIS_2023_train_stage1_6
+    evalPath: TNG2023_32/test/
     tfrecordsColumns: 'y'
     optmization: false
     distributed: false
-    train_size: 4995120
+    train_size: 499512
     test_size: 1248800
     from-epoch: 0
 
 learningRateScheduler:
     scheduler: WarmUpCosine
-    warmupEpochs: 10
-    cycleEpochs: 50
-    lowerLR: 1.0e-6
+    warmupEpochs: 5
+    cycleEpochs: 20
+    lowerLR: 1.0e-5
     upperLR: 1.0e-4
 
-modelName: 'SwinV3UltraTinyWS'
+modelName: 'SwinV3Config'
 model:
-    name: 'SwinV3_STAGE1_UltraTinyWS'
+    name: 'SwinV3_STAGE1_Ensemble_6'
     include_top: true
     input_size: [128, 128]
     patch_size: 4
@@ -52,6 +52,6 @@ augmentation:
     zoom: 0.0
 
 metrics: ['accuracy']
-optimizer: LionCA
-loss: 'BinaryCrossentropy'
+optimizer: Lion
+loss: 'binary_crossentropy'
 from-epoch: 0

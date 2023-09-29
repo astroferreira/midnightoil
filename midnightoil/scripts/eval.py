@@ -34,7 +34,8 @@ print('Loading dataset')
 tPlanner.loadData(training=False, batchSize=1536, with_rootnames=True, mock_survey=True)
 preds = tPlanner.model.predict(tPlanner.test_dataset)
 rootnames = tf.concat([ex[2] for ex in tPlanner.test_dataset], axis=0)
-np.save(f"{runPath}/preds_mock_survey.npy", preds)
-np.save(f'{runPath}/mock_rootnames.npy', rootnames)
+
+np.save(f"{runPath}/preds_mock_surveyv3.npy", preds)
+np.save(f'{runPath}/mock_rootnamesv3.npy', rootnames)
 
 

@@ -58,7 +58,7 @@ def load_dataset(path, epochs, columns='y',
         dataset = dataset.batch(batch_size, drop_remainder=True)
         dataset = dataset.prefetch(tf.data.AUTOTUNE)
     else:
-        dataset = dataset.batch(batch_size, drop_remainder=True)
+        dataset = dataset.batch(batch_size)
         
     return dataset
 
@@ -68,7 +68,12 @@ def load_latest_weights(tPlanner, config, args, current_run, runPath):
     checkpoint_dir = f'{runPath}/checkpoints/'
 
     if args.eval_epoch is not None:
-        checkpoint_dir = checkpoint_dir + f'0{args.eval_epoch}.ckpt'
+        
+        if int(args.eval_epoch) < 100:
+            checkpoint_dir = checkpoint_dir + f'0{args.eval_epoch}.ckpt'
+        else:
+            checkpoint_dir = checkpoint_dir + f'{args.eval_epoch}.ckpt'
+
         tPlanner.model.load_weights(checkpoint_dir).expect_partial()
     else:
         latest = tf.train.latest_checkpoint(checkpoint_dir)
