@@ -23,10 +23,9 @@ def parse(image_feature_description, columns='y', with_labels=True, with_rootnam
             input_shape = (model_cfg['input_size'][0], model_cfg['input_size'][1], model_cfg['channels'])    
 
         image = tf.reshape(image, input_shape)
-        """
-            image = tf.reshape(image, input_shape)
-            image = tf.image.resize(image, [128, 128], method=tf.image.ResizeMethod.BICUBIC)
-            image = tf.math.divide(
+        #image = tf.reshape(image, input_shape)
+        image = tf.image.resize(image, [256, 256], method=tf.image.ResizeMethod.BICUBIC)
+        image = tf.math.divide(
                             tf.subtract(
                                 image, 
                                 tf.reduce_min(image)
@@ -37,7 +36,6 @@ def parse(image_feature_description, columns='y', with_labels=True, with_rootnam
                             )
                         )
             
-        """
         labels = tf.one_hot(tf.cast(example[columns], dtype=tf.int64), depth=2)
                         
         if with_labels:

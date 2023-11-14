@@ -21,7 +21,7 @@ def build_TFRecordDataset(path, columns='y', training=False, with_rootnames=Fals
     files = sorted(glob.glob(path))
     if training:
         ds_files = tf.data.Dataset.from_tensor_slices(files)
-        dataset = ds_files.shuffle(len(files)).interleave(lambda x: tf.data.TFRecordDataset(x,  num_parallel_reads=tf.data.AUTOTUNE))
+        dataset = ds_files.interleave(lambda x: tf.data.TFRecordDataset(x,  num_parallel_reads=tf.data.AUTOTUNE))
     else:
         dataset = tf.data.TFRecordDataset(files)
 
@@ -47,7 +47,9 @@ def load_dataset(path, epochs, columns='y',
         the help of the map function.
     """
     print(path)  
-    dataset = build_TFRecordDataset(path, columns, with_rootnames=with_rootnames, model_cfg=model_cfg, mock_survey=mock_survey)
+    dataset = build_TFRecordDataset(path, columns, training=training,
+                                    with_rootnames=with_rootnames,
+                                    model_cfg=model_cfg, mock_survey=mock_survey)
     
     if training:  
         dataset = dataset.shuffle(20000)
@@ -58,6 +60,7 @@ def load_dataset(path, epochs, columns='y',
         dataset = dataset.batch(batch_size, drop_remainder=True)
         dataset = dataset.prefetch(tf.data.AUTOTUNE)
     else:
+        dataset = dataset.repeat(epochs+10)
         dataset = dataset.batch(batch_size)
         
     return dataset

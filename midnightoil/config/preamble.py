@@ -10,6 +10,16 @@ print(tf.keras.backend.floatx())
 
 from datetime import datetime 
 
+from pathlib import Path 
+import re 
+import math
+file_pattern = re.compile(r'.*?(\d+).*?')
+def get_order(file):
+    match = file_pattern.match(Path(file).name)
+    if not match:
+        return math.inf
+    return int(match.groups()[0])
+
 class Config(object):
 
     def __init__(self):
@@ -52,14 +62,17 @@ def handle_args():
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = args.tf_log_level
 
     timestamp = datetime.now().strftime('%Y%m%d%H%M')
-
+    
+    clean_log_folders()
+    
     if args.resume_run is None:
-        runs = [str(f.split('/')[-1]) for f in sorted(glob.glob(f"/home/ferreira/scratch/runs/*"))]
+        runs = [str(f.split('/')[-1]) for f in sorted(glob.glob(f"/home/ferreira/scratch/runs/*"), key=get_order)]
 
         if len(runs) > 0:
-            current_run = f"{int(runs[-1].split('_')[0])+1:03}_{config['model']['name']}_{timestamp}"
+            print(int(runs[-1].split('_')[0]))
+            current_run = f"{int(runs[-1].split('_')[0])+1:04}_{config['model']['name']}"
         else:
-            current_run = f"001_{config['model']['name']}_{timestamp}"
+            current_run = f"001_{config['model']['name']}"
  
         run_dirname = f"/home/ferreira/scratch/runs/{current_run}"
         if not os.path.exists(run_dirname):
@@ -79,3 +92,17 @@ def handle_args():
     tfconfig = Config()
 
     return current_run, args, config
+
+
+def clean_log_folders():
+
+    runs = sorted(glob.glob(f'/home/ferreira/scratch/runs/*'))
+
+    for run in runs:
+        checkpoints = glob.glob(os.path.join(run, 'checkpoints', '*'))
+        no_config = ~os.path.exists(os.path.join(run, '/config.yaml'))
+        if (len(checkpoints) == 0) & (no_config):
+            print(f'Deleting empty run {run}')
+            os.system(f'rm -r {run}')
+        
+    

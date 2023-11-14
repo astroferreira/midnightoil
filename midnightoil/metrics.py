@@ -5,6 +5,8 @@ from coral_ordinal import MeanAbsoluteErrorLabels
 metrics_list = {
     'categorical_accuracy' : 'categorical_accuracy',
     'accuracy' : 'accuracy',
+    'precision' : tf.keras.metrics.Precision(),
+    'recall' : tf.keras.metrics.Recall(),
     'MAELabels' : MeanAbsoluteErrorLabels(),
     'mse' : 'mean_squared_error'
 }

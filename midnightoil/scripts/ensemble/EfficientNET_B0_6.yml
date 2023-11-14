@@ -4,12 +4,12 @@ trainingPlan:
     initialEpoch: 0
     batchSize: 1024
     dataPath: TNG2023_32/train/CFIS_2023_train_stage1_6
-    evalPath: TNG2023_32/test/
+    evalPath: TNG2023_32/test/CFIS_2023_test_stage1_6
     tfrecordsColumns: 'y'
     optmization: false
     distributed: false
     train_size: 499512
-    test_size: 1248800
+    test_size: 124880
     from-epoch: 0
 
 learningRateScheduler:
@@ -19,7 +19,7 @@ learningRateScheduler:
     lowerLR: 1.0e-6
     upperLR: 1.0e-4
 
-modelName: 'EfficientNetB0'
+modelName: 'ENB0withtop'
 model:
     name: 'B0_STAGE1_6'
     classification: true
@@ -40,6 +40,6 @@ augmentation:
 
 
 metrics: ['accuracy']
-optimizer: Lion
+optimizer: LionCA
 loss: 'binary_crossentropy'
 from-epoch: 0

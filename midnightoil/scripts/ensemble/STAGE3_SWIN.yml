@@ -2,14 +2,14 @@ trainingPlan:
     runName: 'ViT'
     epochs: 5
     initialEpoch: 0
-    batchSize: 2048
-    dataPath: TNG2023_32/train/CFIS_2023_train_stage1_0
-    evalPath: TNG2023_32/test/CFIS_2023_test_stage1_0
-    tfrecordsColumns: 'y'
+    batchSize: 256
+    dataPath: TNG2023_32/train/
+    evalPath: TNG2023_32/test/
+    tfrecordsColumns: 'merger_bin_label'
     optmization: false
     distributed: false
-    train_size: 499512
-    test_size: 124880
+    train_size: 873120
+    test_size: 218320
     from-epoch: 0
 
 learningRateScheduler:
@@ -21,12 +21,12 @@ learningRateScheduler:
 
 modelName: 'SwinV3Config3'
 model:
-    name: 'SwinV3_v2STAGE1_Ensemble_0'
+    name: 'SwinV3_STAGE3'
     include_top: true
     input_size: [128, 128]
     patch_size: 4
     channels: 1
-    num_classes: 2
+    num_classes: 4
     embed_dim: 24
     window_size: 8
     mlp_ratio: 4
@@ -52,6 +52,6 @@ augmentation:
     zoom: 0.0
 
 metrics: ['accuracy']
-optimizer: LionLow
+optimizer: Lion
 loss: 'binary_crossentropy'
 from-epoch: 0
