@@ -5,6 +5,7 @@ from .bickley2021 import bickley2021
 from .efficientnet import ENB0, CORN_B0, ENB0withtop
 from .transformersv2 import SwinTransformerv2
 from .transformersv3 import SwinV3, SwinV3UltraTiny, SwinV3UltraTinyWS, SwinV3Config, SwinV3Config2, SwinV3Config3
+from .convnext import ConvNeXtTiny_model
 from .maxvit import MaxViT
 
 
@@ -25,7 +26,9 @@ models_list = {
     'SwinV3Config2' : SwinV3Config2,
     'MaxViT' :  MaxViT,
     'SwinV3Config3': SwinV3Config3,
-    'ENB0withtop' : ENB0withtop
+    'ENB0withtop' : ENB0withtop,
+    'ENB0' : ENB0,
+    'ConvNextTiny' : ConvNeXtTiny_model
 }
 
 def get_model(name, config):

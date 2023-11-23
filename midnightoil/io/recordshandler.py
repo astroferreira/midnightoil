@@ -22,19 +22,20 @@ def parse(image_feature_description, columns='y', with_labels=True, with_rootnam
         else:
             input_shape = (model_cfg['input_size'][0], model_cfg['input_size'][1], model_cfg['channels'])    
 
-        image = tf.reshape(image, input_shape)
-        #image = tf.reshape(image, input_shape)
-        image = tf.image.resize(image, [256, 256], method=tf.image.ResizeMethod.BICUBIC)
-        image = tf.math.divide(
-                            tf.subtract(
-                                image, 
-                                tf.reduce_min(image)
-                            ), 
-                            tf.subtract(
-                                tf.reduce_max(image), 
-                                tf.reduce_min(image)
+        image = tf.reshape(image, (128, 128, 1))
+        
+        if model_cfg['input_size'][0] != 128:
+            image = tf.image.resize(image, [model_cfg['input_size'][0], model_cfg['input_size'][1]], method=tf.image.ResizeMethod.BICUBIC)
+            image = tf.math.divide(
+                                tf.subtract(
+                                    image, 
+                                    tf.reduce_min(image)
+                                ), 
+                                tf.subtract(
+                                    tf.reduce_max(image), 
+                                    tf.reduce_min(image)
+                                )
                             )
-                        )
             
         labels = tf.one_hot(tf.cast(example[columns], dtype=tf.int64), depth=2)
                         

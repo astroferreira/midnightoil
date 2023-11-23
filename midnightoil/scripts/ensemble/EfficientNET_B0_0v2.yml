@@ -17,7 +17,7 @@ learningRateScheduler:
     warmupEpochs: 10
     cycleEpochs: 50
     lowerLR: 1.0e-6
-    upperLR: 1.0e-4
+    upperLR: 1.0e-5
 
 modelName: 'ENB0withtop'
 model:
@@ -25,7 +25,7 @@ model:
     classification: true
     dropout: 0.0
     num_classes: 2
-    input_size: [128, 128]
+    input_size: [224, 224]
     channels: 1
 
 augmentation:

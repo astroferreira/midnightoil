@@ -15,7 +15,7 @@ trainingPlan:
 learningRateScheduler:
     scheduler: WarmUpCosine
     warmupEpochs: 10
-    cycleEpochs: 50
+    cycleEpochs: 200
     lowerLR: 1.0e-6
     upperLR: 1.0e-4
 
@@ -25,7 +25,7 @@ model:
     classification: true
     dropout: 0.0
     num_classes: 2
-    input_size: [128, 128]
+    input_size: [224, 224]
     channels: 1
 
 augmentation:
@@ -40,6 +40,6 @@ augmentation:
 
 
 metrics: ['accuracy']
-optimizer: LionCA
+optimizer: Adam
 loss: 'binary_crossentropy'
 from-epoch: 0

@@ -62,7 +62,7 @@ class TrainingPlanner:
 
         
         
-        mixed_precision.set_global_policy('mixed_float16')
+        #mixed_precision.set_global_policy('mixed_float16')
         strategy = tf.distribute.MirroredStrategy()
         print('Number of devices: {}'.format(strategy.num_replicas_in_sync))
         # Open a strategy scope.
@@ -79,8 +79,8 @@ class TrainingPlanner:
             self.loss = load_loss(self.config['loss'])
             
             self.metrics = [get_metric(metric) for metric in self.metrics]
-
-
+            self.metrics.append(tf.keras.metrics.Precision())
+            self.metrics.append(tf.keras.metrics.Recall())
             self.model.compile(optimizer=self.optimizer, loss=self.loss,
                             metrics=self.metrics)
 
@@ -138,6 +138,7 @@ class TrainingPlanner:
                                             columns=self.columns,
                                             training=False,
                                             batch_size=batchSize,
+                                            model_cfg=self.config['model'],
                                             with_rootnames=with_rootnames,
                                             mock_survey=mock_survey)
         

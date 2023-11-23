@@ -8,7 +8,8 @@ metrics_list = {
     'precision' : tf.keras.metrics.Precision(),
     'recall' : tf.keras.metrics.Recall(),
     'MAELabels' : MeanAbsoluteErrorLabels(),
-    'mse' : 'mean_squared_error'
+    'mse' : 'mean_squared_error',
+    'false_positives' : tf.keras.metrics.FalsePositives()
 }
 
 def get_metric(metric):

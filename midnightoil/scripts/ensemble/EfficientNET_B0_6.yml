@@ -40,6 +40,6 @@ augmentation:
 
 
 metrics: ['accuracy']
-optimizer: LionCA
+optimizer: Lion
 loss: 'binary_crossentropy'
 from-epoch: 0

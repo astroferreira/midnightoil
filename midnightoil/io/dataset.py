@@ -54,9 +54,12 @@ def load_dataset(path, epochs, columns='y',
     if training:  
         dataset = dataset.shuffle(20000)
         dataset = dataset.repeat(epochs+10)
-        dataset = dataset.map(augment, num_parallel_calls=tf.data.AUTOTUNE)
-        dataset = dataset.map(shear, num_parallel_calls=tf.data.AUTOTUNE)
-        dataset = dataset.map(zoom, num_parallel_calls=tf.data.AUTOTUNE)
+
+        dataset = dataset.map(lambda x, y: tf.cond(RNG.uniform((1,), 0, 1) <= 0.5, lambda: augment(x, y), lambda: (x, y)), num_parallel_calls=tf.data.AUTOTUNE)
+        dataset = dataset.map(lambda x, y: tf.cond(RNG.uniform((1,), 0, 1) <= 0.5, lambda: shear(x, y), lambda: (x, y)), num_parallel_calls=tf.data.AUTOTUNE)
+        dataset = dataset.map(lambda x, y: tf.cond(RNG.uniform((1,), 0, 1) <= 0.5, lambda: zoom(x, y), lambda: (x, y)), num_parallel_calls=tf.data.AUTOTUNE)
+        #dataset = dataset.map(shear, num_parallel_calls=tf.data.AUTOTUNE)
+        #dataset = dataset.map(zoom, num_parallel_calls=tf.data.AUTOTUNE)
         dataset = dataset.batch(batch_size, drop_remainder=True)
         dataset = dataset.prefetch(tf.data.AUTOTUNE)
     else:
