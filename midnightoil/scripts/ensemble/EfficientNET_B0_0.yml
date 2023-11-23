@@ -1,6 +1,6 @@
 trainingPlan:
     runName: 'ViT'
-    epochs: 5
+    epochs: 10
     initialEpoch: 0
     batchSize: 1024
     dataPath: TNG2023_32/train/CFIS_2023_train_stage1_0
@@ -33,10 +33,9 @@ augmentation:
     flip: 1.0
     rotate90: 1.0
     rotate: 0.7
-    shear_x: 0.7
     shear_y: 0.7
     oclusion: 0.7
-    zoom: 0.0
+    zoom: 0.3
 
 
 metrics: ['accuracy']
