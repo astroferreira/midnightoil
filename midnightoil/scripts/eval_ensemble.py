@@ -12,16 +12,16 @@ from tfswin import SwinTransformer, SwinTransformerTiny224, preprocess_input
 from tensorflow.keras import mixed_precision
 mixed_precision.set_global_policy('mixed_float16')
 
-models_path = ['/home/ferreira/scratch/runs/1051_B0_STAGE1_0', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_0_202309041700',
-               '/home/ferreira/scratch/runs/1051_B0_STAGE1_1',
-               '/home/ferreira/scratch/runs/1051_B0_STAGE1_2', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_1_202309041721',
-               '/home/ferreira/scratch/runs/1051_B0_STAGE1_3', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_2_202309041737',
-               '/home/ferreira/scratch/runs/1052_B0_STAGE1_4', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_3_202309042315',
-               '/home/ferreira/scratch/runs/1053_B0_STAGE1_5', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_4_202309050005',
-               '/home/ferreira/scratch/runs/1054_B0_STAGE1_6', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_5_202309050011',
-               '/home/ferreira/scratch/runs/1055_B0_STAGE1_7',#'/home/ferreira/scratch/runs/1000_B0_STAGE1_6_202309050011',
-               '/home/ferreira/scratch/runs/1056_B0_STAGE1_8',#'/home/ferreira/scratch/runs/1000_B0_STAGE1_7_202309050011',
-               '/home/ferreira/scratch/runs/1057_B0_STAGE1_9',#'/home/ferreira/scratch/runs/1000_B0_STAGE1_8_202309050011', 
+models_path = ['/home/ferreira/scratch/runs/1038_B0_STAGE1_0', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_0_202309041700',
+               '/home/ferreira/scratch/runs/1031_B0_STAGE1_1',
+               '/home/ferreira/scratch/runs/1039_B0_STAGE1_2', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_1_202309041721',
+               '/home/ferreira/scratch/runs/1033_B0_STAGE1_3', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_2_202309041737',
+               '/home/ferreira/scratch/runs/1039_B0_STAGE1_4', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_3_202309042315',
+               '/home/ferreira/scratch/runs/1040_B0_STAGE1_5', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_4_202309050005',
+               '/home/ferreira/scratch/runs/1033_B0_STAGE1_6', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_5_202309050011',
+               '/home/ferreira/scratch/runs/1042_B0_STAGE1_7',#'/home/ferreira/scratch/runs/1000_B0_STAGE1_6_202309050011',
+               '/home/ferreira/scratch/runs/1043_B0_STAGE1_8',#'/home/ferreira/scratch/runs/1000_B0_STAGE1_7_202309050011',
+               '/home/ferreira/scratch/runs/1044_B0_STAGE1_9',#'/home/ferreira/scratch/runs/1000_B0_STAGE1_8_202309050011', 
                '/home/ferreira/scratch/runs/1018_SwinV3_v2STAGE1_Ensemble_0',#'/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_0_202309051301',
                '/home/ferreira/scratch/runs/1029_SwinV3_v2STAGE1_Ensemble_1',#'/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_1_202309041155',
                '/home/ferreira/scratch/runs/1021_SwinV3_v2STAGE1_Ensemble_2',#'/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_2_202309041156',
@@ -188,7 +188,7 @@ def load_dataset(path, epochs, columns='y',
     return dataset
 
 
-dataset =  load_dataset('/home/ferreira/scratch/hierarchy_stage1/TNG2023_32/test/*.tfrecords', 1,  with_rootnames=False, batch_size=64)
+dataset =  load_dataset('/home/ferreira/scratch/hierarchy_stage1/TNG2023_32/test/*.tfrecords', 1,  with_rootnames=False, batch_size=1024)
 #dataset = np.load('/home/ferreira/scratch/merger_histories.npy')
 #redshifts = tf.concat([ex[2] for ex in dataset], axis=0)
 #camera =   tf.concat([ex[1] for ex in dataset], axis=0)
@@ -224,7 +224,7 @@ def find_best_epoch(model, column='val_loss'):
     dfs = pd.concat(dfs)
     dfs['name'] = name
     
-    return dfs.loc[dfs.val_accuracy == np.max(dfs.val_accuracy)]['snap'].values[0]
+    return dfs.loc[dfs.val_loss == np.min(dfs.val_loss)]['snap'].values[0]
 
 models = []
 rootnames = []
@@ -261,7 +261,7 @@ for i, mp in enumerate(models_path):
     print(pred.shape)
     models.append(pred)
     #print(.shape)
-    np.save(f'/home/ferreira/scratch/STAGE1_on_test1_features_{i}.npy', np.stack(all))
+    np.save(f'/home/ferreira/scratch/STAGE1_on_test1_features_{i}.npy', np.array(pred))
 #np.save(f'/home/ferreira/scratch/STAGE2_on_test1.npy', pred)
 
     #    del model, model_extractor, all_preds

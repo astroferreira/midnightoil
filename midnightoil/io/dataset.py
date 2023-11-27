@@ -16,7 +16,7 @@ RNG = tf.random.Generator.from_seed(1331)
 
 augmentation_map = {
     'zoom' : zoom,
-    'shear': : shear,
+    'shear': shear,
     'flip': flip,
     'rotate': rotate,
     'rotate90': rotate90,
@@ -63,24 +63,23 @@ def load_dataset(path, epochs, columns='y',
     
     if training:  
         dataset = dataset.shuffle(20000)
-        dataset = dataset.repeat(epochs+10)
+        dataset = dataset.repeat(epochs)
 
         if augmentations is not None:
-            for layer in augmentations['num_layers']:    
+            for layer in range(augmentations['num_layers']):    
                 dataset = dataset.map(lambda x, y: flip(x, y, augmentations['flip']), num_parallel_calls=tf.data.AUTOTUNE)
                 dataset = dataset.map(lambda x, y: rotate90(x, y, augmentations['rotate90']), num_parallel_calls=tf.data.AUTOTUNE)
                 dataset = dataset.map(lambda x, y: rotate(x, y, augmentations['rotate']), num_parallel_calls=tf.data.AUTOTUNE)
                 dataset = dataset.map(lambda x, y: shift(x, y, augmentations['shift']), num_parallel_calls=tf.data.AUTOTUNE)
                 dataset = dataset.map(lambda x, y: shear(x, y, augmentations['shear']), num_parallel_calls=tf.data.AUTOTUNE)
                 dataset = dataset.map(lambda x, y: zoom(x, y, augmentations['zoom']), num_parallel_calls=tf.data.AUTOTUNE)
-                
-            dataset = dataset.map(lambda x, y: oclusion(x, y, augmentations['oclusion']), num_parallel_calls=tf.data.AUTOTUNE)
+                dataset = dataset.map(lambda x, y: oclusion(x, y, augmentations['oclusion']), num_parallel_calls=tf.data.AUTOTUNE)
             #dataset = dataset.map(shear, num_parallel_calls=tf.data.AUTOTUNE)
         #dataset = dataset.map(zoom, num_parallel_calls=tf.data.AUTOTUNE)
         dataset = dataset.batch(batch_size, drop_remainder=True)
         dataset = dataset.prefetch(tf.data.AUTOTUNE)
     else:
-        dataset = dataset.repeat(epochs+10)
+        dataset = dataset.repeat(epochs)
         dataset = dataset.batch(batch_size)
         
     return dataset

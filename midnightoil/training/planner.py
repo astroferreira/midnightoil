@@ -50,7 +50,7 @@ class TrainingPlanner:
         self.train_size = self.configTraining['train_size']
         self.test_size = self.configTraining['test_size']
 
-        self.augmentations = self.parse_augmentations()
+        self.parse_augmentations()
 
         if not self.configTraining['optmization']:
             if self.configTraining['distributed']:
@@ -165,7 +165,8 @@ class TrainingPlanner:
             'rotate': self.augs['rotate'],
             'shear': self.augs['shear'],
             'oclusion': self.augs['oclusion'],
-            'zoom': self.augs['zoom']
+            'zoom': self.augs['zoom'],
+            'shift': self.augs['shift']
             }
 
         

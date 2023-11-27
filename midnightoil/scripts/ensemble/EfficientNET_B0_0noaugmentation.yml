@@ -14,12 +14,12 @@ trainingPlan:
 
 learningRateScheduler:
     scheduler: WarmUpCosine
-    warmupEpochs: 0
+    warmupEpochs: 10
     cycleEpochs: 200
     lowerLR: 1.0e-6
     upperLR: 1.0e-4
 
-modelName: 'ENB0'
+modelName: 'ENB0withtop'
 model:
     name: 'B0_STAGE1_0'
     classification: true
@@ -29,17 +29,16 @@ model:
     channels: 1
 
 augmentation:
-    num_layers: 1
-    flip: 0.3
-    rotate90: 0.3
-    rotate: 0.3
-    shear: 0.3
-    oclusion: 0.3
-    shift: 0.3
-    zoom: 0.3
+    num_layers: 0
+    flip: 0.0
+    rotate90: 0.0
+    rotate: 0.0
+    shear: 0.0
+    oclusion: 0.0
+    zoom: 0.0
 
 
 metrics: ['accuracy']
-optimizer: Lion
+optimizer: Adam
 loss: 'binary_crossentropy'
 from-epoch: 0
