@@ -73,7 +73,8 @@ def load_dataset(path, epochs, columns='y',
                 dataset = dataset.map(lambda x, y: shift(x, y, augmentations['shift']), num_parallel_calls=tf.data.AUTOTUNE)
                 dataset = dataset.map(lambda x, y: shear(x, y, augmentations['shear']), num_parallel_calls=tf.data.AUTOTUNE)
                 dataset = dataset.map(lambda x, y: zoom(x, y, augmentations['zoom']), num_parallel_calls=tf.data.AUTOTUNE)
-                dataset = dataset.map(lambda x, y: oclusion(x, y, augmentations['oclusion']), num_parallel_calls=tf.data.AUTOTUNE)
+            
+            dataset = dataset.map(lambda x, y: oclusion(x, y, augmentations['oclusion']), num_parallel_calls=tf.data.AUTOTUNE)
             #dataset = dataset.map(shear, num_parallel_calls=tf.data.AUTOTUNE)
         #dataset = dataset.map(zoom, num_parallel_calls=tf.data.AUTOTUNE)
         dataset = dataset.batch(batch_size, drop_remainder=True)

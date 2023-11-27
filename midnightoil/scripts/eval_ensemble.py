@@ -10,9 +10,9 @@ from keras import layers, models
 from tfswin import SwinTransformer, SwinTransformerTiny224, preprocess_input
 
 from tensorflow.keras import mixed_precision
-mixed_precision.set_global_policy('mixed_float16')
+#mixed_precision.set_global_policy('mixed_float16')
 
-models_path = ['/home/ferreira/scratch/runs/1038_B0_STAGE1_0', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_0_202309041700',
+models_path = ['/home/ferreira/scratch/runs/1076_B0_STAGE1_0', #1038_B0_STAGE1_0', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_0_202309041700',
                '/home/ferreira/scratch/runs/1031_B0_STAGE1_1',
                '/home/ferreira/scratch/runs/1039_B0_STAGE1_2', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_1_202309041721',
                '/home/ferreira/scratch/runs/1033_B0_STAGE1_3', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_2_202309041737',
@@ -67,6 +67,8 @@ models_path = [
                '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_9_202309051745']
 
 """
+
+models_path = ['/home/ferreira/scratch/runs/1076_B0_STAGE1_0']
 #models_path = ['/home/ferreira/scratch/runs/837_SwinV3_STAGE2_202308252303']
 
 def parse(image_feature_description, columns='y', with_labels=True, with_rootnames=False, model_cfg=None, mock_survey=False):
@@ -84,7 +86,7 @@ def parse(image_feature_description, columns='y', with_labels=True, with_rootnam
         
         image = tf.reshape(image, input_shape)
         
-        image = tf.image.resize(image, [256, 256], method=tf.image.ResizeMethod.BICUBIC)
+        image = tf.image.resize(image, [224, 224], method=tf.image.ResizeMethod.BICUBIC)
         image = tf.math.divide(
                             tf.subtract(
                                 image, 
@@ -205,7 +207,7 @@ def SwinV3(config):
 
     model = models.Model(inputs=inputs, outputs=outputs)
 
-    return model
+return model
 
 def find_best_epoch(model, column='val_loss'):
     name = model.split('/')[-1]
@@ -219,7 +221,7 @@ def find_best_epoch(model, column='val_loss'):
     dfs = [pd.read_csv(h) for h in histories]
     
     for df, min in zip(dfs, snap_min):
-        df['snap'] = np.arange(min+1, min+6) 
+        df['snap'] = np.arange(min+1, min+df.shape[0]+1) 
 
     dfs = pd.concat(dfs)
     dfs['name'] = name

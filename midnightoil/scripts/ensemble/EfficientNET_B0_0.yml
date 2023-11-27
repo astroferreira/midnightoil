@@ -29,7 +29,7 @@ model:
     channels: 1
 
 augmentation:
-    num_layers: 1
+    num_layers: 2
     flip: 0.3
     rotate90: 0.3
     rotate: 0.3
@@ -40,6 +40,6 @@ augmentation:
 
 
 metrics: ['accuracy']
-optimizer: Lion
+optimizer: LionCA
 loss: 'binary_crossentropy'
 from-epoch: 0
