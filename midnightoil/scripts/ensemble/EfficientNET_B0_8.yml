@@ -1,6 +1,6 @@
 trainingPlan:
     runName: 'ViT'
-    epochs: 5
+    epochs: 10
     initialEpoch: 0
     batchSize: 1024
     dataPath: TNG2023_32/train/CFIS_2023_train_stage1_8
@@ -14,32 +14,32 @@ trainingPlan:
 
 learningRateScheduler:
     scheduler: WarmUpCosine
-    warmupEpochs: 10
-    cycleEpochs: 50
+    warmupEpochs: 0
+    cycleEpochs: 200
     lowerLR: 1.0e-6
     upperLR: 1.0e-4
 
-modelName: 'ENB0withtop'
+modelName: 'ENB0'
 model:
     name: 'B0_STAGE1_8'
     classification: true
     dropout: 0.0
     num_classes: 2
-    input_size: [128, 128]
+    input_size: [224, 224]
     channels: 1
 
 augmentation:
-    num_layers: 2
-    flip: 1.0
-    rotate90: 1.0
+    num_layers: 1
+    flip: 0.7
+    rotate90: 0.7
     rotate: 0.7
-    shear_x: 0.7
-    shear_y: 0.7
+    shear: 0.7
     oclusion: 0.7
-    zoom: 0.0
+    shift: 0.7
+    zoom: 0.7
 
 
 metrics: ['accuracy']
-optimizer: Lion
+optimizer: LionCA
 loss: 'binary_crossentropy'
 from-epoch: 0

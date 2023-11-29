@@ -10,18 +10,18 @@ from keras import layers, models
 from tfswin import SwinTransformer, SwinTransformerTiny224, preprocess_input
 
 from tensorflow.keras import mixed_precision
-#mixed_precision.set_global_policy('mixed_float16')
 
-models_path = ['/home/ferreira/scratch/runs/1076_B0_STAGE1_0', #1038_B0_STAGE1_0', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_0_202309041700',
-               '/home/ferreira/scratch/runs/1031_B0_STAGE1_1',
-               '/home/ferreira/scratch/runs/1039_B0_STAGE1_2', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_1_202309041721',
-               '/home/ferreira/scratch/runs/1033_B0_STAGE1_3', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_2_202309041737',
-               '/home/ferreira/scratch/runs/1039_B0_STAGE1_4', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_3_202309042315',
-               '/home/ferreira/scratch/runs/1040_B0_STAGE1_5', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_4_202309050005',
-               '/home/ferreira/scratch/runs/1033_B0_STAGE1_6', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_5_202309050011',
-               '/home/ferreira/scratch/runs/1042_B0_STAGE1_7',#'/home/ferreira/scratch/runs/1000_B0_STAGE1_6_202309050011',
-               '/home/ferreira/scratch/runs/1043_B0_STAGE1_8',#'/home/ferreira/scratch/runs/1000_B0_STAGE1_7_202309050011',
-               '/home/ferreira/scratch/runs/1044_B0_STAGE1_9',#'/home/ferreira/scratch/runs/1000_B0_STAGE1_8_202309050011', 
+
+models_path = ['/home/ferreira/scratch/runs/1078_B0_STAGE1_0', #1038_B0_STAGE1_0', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_0_202309041700',
+               '/home/ferreira/scratch/runs/1081_B0_STAGE1_1',
+               '/home/ferreira/scratch/runs/1082_B0_STAGE1_2', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_1_202309041721',
+               '/home/ferreira/scratch/runs/1082_B0_STAGE1_3', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_2_202309041737',
+               '/home/ferreira/scratch/runs/1083_B0_STAGE1_4', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_3_202309042315',
+               '/home/ferreira/scratch/runs/1083_B0_STAGE1_5', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_4_202309050005',
+               '/home/ferreira/scratch/runs/1083_B0_STAGE1_6', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_5_202309050011',
+               '/home/ferreira/scratch/runs/1084_B0_STAGE1_7',#'/home/ferreira/scratch/runs/1000_B0_STAGE1_6_202309050011',
+               '/home/ferreira/scratch/runs/1084_B0_STAGE1_8',#'/home/ferreira/scratch/runs/1000_B0_STAGE1_7_202309050011',
+               '/home/ferreira/scratch/runs/1084_B0_STAGE1_9',#'/home/ferreira/scratch/runs/1000_B0_STAGE1_8_202309050011', 
                '/home/ferreira/scratch/runs/1018_SwinV3_v2STAGE1_Ensemble_0',#'/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_0_202309051301',
                '/home/ferreira/scratch/runs/1029_SwinV3_v2STAGE1_Ensemble_1',#'/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_1_202309041155',
                '/home/ferreira/scratch/runs/1021_SwinV3_v2STAGE1_Ensemble_2',#'/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_2_202309041156',
@@ -68,7 +68,7 @@ models_path = [
 
 """
 
-models_path = ['/home/ferreira/scratch/runs/1076_B0_STAGE1_0']
+#models_path = ['/home/ferreira/scratch/runs/1076_B0_STAGE1_0']
 #models_path = ['/home/ferreira/scratch/runs/837_SwinV3_STAGE2_202308252303']
 
 def parse(image_feature_description, columns='y', with_labels=True, with_rootnames=False, model_cfg=None, mock_survey=False):
@@ -189,25 +189,7 @@ def load_dataset(path, epochs, columns='y',
         
     return dataset
 
-
 dataset =  load_dataset('/home/ferreira/scratch/hierarchy_stage1/TNG2023_32/test/*.tfrecords', 1,  with_rootnames=False, batch_size=1024)
-#dataset = np.load('/home/ferreira/scratch/merger_histories.npy')
-#redshifts = tf.concat([ex[2] for ex in dataset], axis=0)
-#camera =   tf.concat([ex[1] for ex in dataset], axis=0)
-
-#np.save('/home/ferreira/scratch/redshifts.npy', redshifts)
-#np.save('/home/ferreira/scratch/camera.npy', camera)
-
-def SwinV3(config):
-
-    inputs = layers.Input(shape=(128, 128, 1))
-    outputs = SwinTransformerTiny224(include_top=False, weights=None, input_shape=(128, 128, 1), swin_v2=True)(inputs)
-    outputs = layers.Flatten()(outputs)
-    outputs = layers.Dense(2, activation='sigmoid')(outputs)
-
-    model = models.Model(inputs=inputs, outputs=outputs)
-
-return model
 
 def find_best_epoch(model, column='val_loss'):
     name = model.split('/')[-1]
@@ -235,7 +217,6 @@ for i, mp in enumerate(models_path):
     epoch = find_best_epoch(mp)
     print(f'Evaluating {mp} at epoch {epoch}')
     
-    
     all_preds =[]
     config = yaml.safe_load(open(mp + '/config.yaml')) 
 
@@ -243,13 +224,13 @@ for i, mp in enumerate(models_path):
     with strategy.scope():
         model = get_model(config['modelName'], config['model'])
     
-    latest = tf.train.latest_checkpoint(mp + '/checkpoints')
+    
     if epoch > 99:
         model.load_weights(f'{mp}/checkpoints/{epoch}.ckpt').expect_partial()
     else:
         model.load_weights(f'{mp}/checkpoints/0{epoch}.ckpt').expect_partial() 
 
-    inputs = Input(shape=(256, 256, 1))
+    #inputs = Input(shape=(256, 256, 1))
     #outputs = model.layers[0](inputs)
     #outputs = model.layers[1](outputs)
     

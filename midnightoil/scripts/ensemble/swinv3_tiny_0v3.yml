@@ -1,57 +1,58 @@
 trainingPlan:
     runName: 'ViT'
-    epochs: 5
+    epochs: 10
     initialEpoch: 0
-    batchSize: 1536
-    dataPath: TNG2023_32/train/CFIS_2023_train_stage1_1
-    evalPath: TNG2023_32/test/
+    batchSize: 1024
+    dataPath: TNG2023_32/train/CFIS_2023_train_stage1_0
+    evalPath: TNG2023_32/test/CFIS_2023_test_stage1_0
     tfrecordsColumns: 'y'
     optmization: false
     distributed: false
     train_size: 499512
-    test_size: 1248800
+    test_size: 124880
     from-epoch: 0
 
 learningRateScheduler:
     scheduler: WarmUpCosine
-    warmupEpochs: 5
-    cycleEpochs: 20
-    lowerLR: 1.0e-5
+    warmupEpochs: 0
+    cycleEpochs: 200
+    lowerLR: 1.0e-6
     upperLR: 1.0e-4
 
-modelName: 'SwinV3Config'
+modelName: 'SwinV3Config3'
 model:
-    name: 'SwinV3_STAGE1_Ensemble_1'
+    name: 'SwinV3_v2STAGE1_Ensemble_0'
     include_top: true
-    input_size: [128, 128]
+    input_size: [256, 256]
     patch_size: 4
     channels: 1
     num_classes: 2
     embed_dim: 24
-    window_size: 4
+    window_size: 8
     mlp_ratio: 4
     qkv_bias: false
     qk_scale: false
     drop_rate: 0.1
     attn_drop_rate: 0.0
     drop_path_rate: 0.0
-    ape: true
+    ape: false
     patch_norm: true
     depths: [2, 2, 4, 2]
-    num_heads: [2, 2, 6, 6]
+    num_heads: [3, 6, 12, 24]
     classification: true
 
 augmentation:
-    num_layers: 2
-    flip: 1.0
-    rotate90: 1.0
+    num_layers: 1
+    flip: 0.7
+    rotate90: 0.7
     rotate: 0.7
-    shear_x: 0.7
-    shear_y: 0.7
+    shear: 0.7
     oclusion: 0.7
-    zoom: 0.0
+    shift: 0.7
+    zoom: 0.7
+
 
 metrics: ['accuracy']
-optimizer: Lion
+optimizer: LionCA
 loss: 'binary_crossentropy'
 from-epoch: 0

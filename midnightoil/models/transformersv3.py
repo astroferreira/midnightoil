@@ -40,6 +40,7 @@ def SwinV3UltraTinyWS(config):
 
     return model
 
+
 def SwinV3Config(config):
 
     inputs = layers.Input(shape=(128, 128, 1))
@@ -67,9 +68,9 @@ def SwinV3Config3(config):
 
     inputs = layers.Input(shape=(256, 256, 1))
     outputs = SwinTransformerTiny224(classes=2, window_size=16, include_top=False, depths=(2, 2, 4, 2), num_heads=(2, 2, 6, 6), embed_dim=config['embed_dim'], weights=None,
-                            swin_v2=True, classifier_activation='sigmoid', input_shape=(256, 256, 1))(inputs)
+                            swin_v2=True, classifier_activation='softmax', input_shape=(256, 256, 1))(inputs)
     outputs = layers.Flatten()(outputs)                        
-    outputs = layers.Dense(2, dtype='float32', activation='sigmoid')(outputs)
+    outputs = layers.Dense(2, dtype='float32', activation='softmax')(outputs)
     model = models.Model(inputs=inputs, outputs=outputs)
 
     return model

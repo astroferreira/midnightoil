@@ -28,15 +28,16 @@ model:
     input_size: [224, 224]
     channels: 1
 
+
 augmentation:
-    num_layers: 2
-    flip: 0.3
-    rotate90: 0.3
-    rotate: 0.3
-    shear: 0.3
-    oclusion: 0.3
-    shift: 0.3
-    zoom: 0.3
+    num_layers: 1
+    flip: 0.7
+    rotate90: 0.7
+    rotate: 0.7
+    shear: 0.7
+    oclusion: 0.7
+    shift: 0.7
+    zoom: 0.7
 
 
 metrics: ['accuracy']
