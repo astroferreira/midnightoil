@@ -46,7 +46,7 @@ if args.resume_run:
     if latest is not None:
         epoch = latest.split('/')[-1]
         epoch = int(epoch.split('.')[0])
-        config['trainingPlan']['epochs'] = epoch + 5
+        config['trainingPlan']['epochs'] = epoch + 10
     
 #        print(f'Resuming training from epoch {epoch} to {epoch+5}, starting with val_loss {last_loss}')
         tPlanner = TrainingPlanner(config, currentRun=current_run, callbacks=callbacks)    

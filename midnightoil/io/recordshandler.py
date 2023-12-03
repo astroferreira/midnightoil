@@ -36,8 +36,11 @@ def parse(image_feature_description, columns='y', with_labels=True, with_rootnam
                                     tf.reduce_min(image)
                                 )
                             )
-            
-        labels = tf.one_hot(tf.cast(example[columns], dtype=tf.int64), depth=2)
+                            
+        if model_cfg['num_classes'] == 1:
+            labels = tf.cast(example[columns], dtype=tf.int64)
+        else:   
+            labels = tf.one_hot(tf.cast(example[columns], dtype=tf.int64), depth=model_cfg['num_classes'])
                         
         if with_labels:
             if with_rootnames:

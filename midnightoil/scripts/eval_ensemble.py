@@ -8,68 +8,16 @@ from keras.models import Model
 from keras.layers import Input
 from keras import layers, models
 from tfswin import SwinTransformer, SwinTransformerTiny224, preprocess_input
+import glob
+import re 
+import math
+from pathlib import Path 
+import yaml
+import pandas as pd
+file_pattern = re.compile(r'.*?(\d+).*?')
 
 from tensorflow.keras import mixed_precision
 
-
-models_path = ['/home/ferreira/scratch/runs/1078_B0_STAGE1_0', #1038_B0_STAGE1_0', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_0_202309041700',
-               '/home/ferreira/scratch/runs/1081_B0_STAGE1_1',
-               '/home/ferreira/scratch/runs/1082_B0_STAGE1_2', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_1_202309041721',
-               '/home/ferreira/scratch/runs/1082_B0_STAGE1_3', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_2_202309041737',
-               '/home/ferreira/scratch/runs/1083_B0_STAGE1_4', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_3_202309042315',
-               '/home/ferreira/scratch/runs/1083_B0_STAGE1_5', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_4_202309050005',
-               '/home/ferreira/scratch/runs/1083_B0_STAGE1_6', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_5_202309050011',
-               '/home/ferreira/scratch/runs/1084_B0_STAGE1_7',#'/home/ferreira/scratch/runs/1000_B0_STAGE1_6_202309050011',
-               '/home/ferreira/scratch/runs/1084_B0_STAGE1_8',#'/home/ferreira/scratch/runs/1000_B0_STAGE1_7_202309050011',
-               '/home/ferreira/scratch/runs/1084_B0_STAGE1_9',#'/home/ferreira/scratch/runs/1000_B0_STAGE1_8_202309050011', 
-               '/home/ferreira/scratch/runs/1018_SwinV3_v2STAGE1_Ensemble_0',#'/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_0_202309051301',
-               '/home/ferreira/scratch/runs/1029_SwinV3_v2STAGE1_Ensemble_1',#'/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_1_202309041155',
-               '/home/ferreira/scratch/runs/1021_SwinV3_v2STAGE1_Ensemble_2',#'/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_2_202309041156',
-               '/home/ferreira/scratch/runs/1021_SwinV3_v2STAGE1_Ensemble_3',#'/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_3_202309041157',
-               '/home/ferreira/scratch/runs/1021_SwinV3_v2STAGE1_Ensemble_4',#'/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_4_202309041203',
-               '/home/ferreira/scratch/runs/1021_SwinV3_v2STAGE1_Ensemble_5',#'/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_5_202309041253',
-               '/home/ferreira/scratch/runs/1022_SwinV3_v2STAGE1_Ensemble_6',#'/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_6_202309041317',
-               '/home/ferreira/scratch/runs/1022_SwinV3_v2STAGE1_Ensemble_7',#'/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_7_202309041317',
-               '/home/ferreira/scratch/runs/1023_SwinV3_v2STAGE1_Ensemble_8',#'/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_8_202309041316',
-               '/home/ferreira/scratch/runs/1024_SwinV3_v2STAGE1_Ensemble_9']#,#'/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_9_202309051745']
-"""
-models_path = ['/home/ferreira/scratch/runs/1000_B0_STAGE1_0_202309041700',
-               '/home/ferreira/scratch/runs/1000_B0_STAGE1_9_202309050017',
-               '/home/ferreira/scratch/runs/1000_B0_STAGE1_1_202309041721',
-               '/home/ferreira/scratch/runs/1000_B0_STAGE1_2_202309041737',
-               '/home/ferreira/scratch/runs/1000_B0_STAGE1_3_202309042315',
-               '/home/ferreira/scratch/runs/1000_B0_STAGE1_4_202309050005',
-               '/home/ferreira/scratch/runs/1000_B0_STAGE1_5_202309050011',
-               '/home/ferreira/scratch/runs/1000_B0_STAGE1_6_202309050011',
-               '/home/ferreira/scratch/runs/1000_B0_STAGE1_7_202309050011',
-               '/home/ferreira/scratch/runs/1000_B0_STAGE1_8_202309050011', 
-               '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_0_202309051301',
-               '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_1_202309041155',
-               '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_2_202309041156',
-               '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_3_202309041157',
-               '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_4_202309041203',
-               '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_5_202309041253',
-               '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_6_202309041317',
-               '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_7_202309041317',
-               '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_8_202309041316',
-               '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_9_202309051745']
-
-models_path = [
-               '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_0_202309051301',
-               '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_1_202309041155',
-               '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_2_202309041156',
-               '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_3_202309041157',
-               '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_4_202309041203',
-               '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_5_202309041253',
-               '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_6_202309041317',
-               '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_7_202309041317',
-               '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_8_202309041316',
-               '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_9_202309051745']
-
-"""
-
-#models_path = ['/home/ferreira/scratch/runs/1076_B0_STAGE1_0']
-#models_path = ['/home/ferreira/scratch/runs/837_SwinV3_STAGE2_202308252303']
 
 def parse(image_feature_description, columns='y', with_labels=True, with_rootnames=False, model_cfg=None, mock_survey=False):
 
@@ -77,7 +25,7 @@ def parse(image_feature_description, columns='y', with_labels=True, with_rootnam
 
         example = tf.io.parse_single_example(ep, image_feature_description)
         
-        image = tf.io.decode_raw(example['X'], out_type=np.float32)
+        image = tf.io.decode_raw(example['X'], out_type=np.float64)
 
         if model_cfg is None:
             input_shape = (128, 128, 1)
@@ -86,7 +34,7 @@ def parse(image_feature_description, columns='y', with_labels=True, with_rootnam
         
         image = tf.reshape(image, input_shape)
         
-        image = tf.image.resize(image, [224, 224], method=tf.image.ResizeMethod.BICUBIC)
+        image = tf.image.resize(image, [256, 256], method=tf.image.ResizeMethod.BICUBIC)
         image = tf.math.divide(
                             tf.subtract(
                                 image, 
@@ -105,12 +53,7 @@ def parse(image_feature_description, columns='y', with_labels=True, with_rootnam
 
     return _parser
 
-import glob
-import re 
-import math
-from pathlib import Path 
-import yaml
-file_pattern = re.compile(r'.*?(\d+).*?')
+
 def get_order(file):
     match = file_pattern.match(Path(file).name)
     if not match:
@@ -185,11 +128,10 @@ def load_dataset(path, epochs, columns='y',
         dataset = dataset.batch(batch_size, drop_remainder=True)
         dataset = dataset.prefetch(tf.data.AUTOTUNE)
     else:
-        dataset = dataset.batch(batch_size)
+        dataset = dataset.batch(batch_size, drop_remainder=True)
         
     return dataset
 
-dataset =  load_dataset('/home/ferreira/scratch/hierarchy_stage1/TNG2023_32/test/*.tfrecords', 1,  with_rootnames=False, batch_size=1024)
 
 def find_best_epoch(model, column='val_loss'):
     name = model.split('/')[-1]
@@ -208,45 +150,122 @@ def find_best_epoch(model, column='val_loss'):
     dfs = pd.concat(dfs)
     dfs['name'] = name
     
-    return dfs.loc[dfs.val_loss == np.min(dfs.val_loss)]['snap'].values[0]
+    return dfs.loc[dfs.val_accuracy == np.max(dfs.val_accuracy)]['snap'].values[0]
 
-models = []
-rootnames = []
-import pandas as pd
-for i, mp in enumerate(models_path):
-    epoch = find_best_epoch(mp)
-    print(f'Evaluating {mp} at epoch {epoch}')
-    
-    all_preds =[]
-    config = yaml.safe_load(open(mp + '/config.yaml')) 
 
-    strategy = tf.distribute.MirroredStrategy()
-    with strategy.scope():
-        model = get_model(config['modelName'], config['model'])
-    
-    
-    if epoch > 99:
-        model.load_weights(f'{mp}/checkpoints/{epoch}.ckpt').expect_partial()
-    else:
-        model.load_weights(f'{mp}/checkpoints/0{epoch}.ckpt').expect_partial() 
+if __name__ == '__main__':
 
-    #inputs = Input(shape=(256, 256, 1))
-    #outputs = model.layers[0](inputs)
-    #outputs = model.layers[1](outputs)
-    
-    #model_extractor = Model(inputs=inputs, outputs=outputs)
-    #rootnames = [ex[1] for ex in dataset]
-    #for item in dataset:
-    #    pred = model_extractor.predict(dataset)
-     #   all_preds.append(pred) 
-    
-    pred = model.predict(dataset)
-    print(pred.shape)
-    models.append(pred)
-    #print(.shape)
-    np.save(f'/home/ferreira/scratch/STAGE1_on_test1_features_{i}.npy', np.array(pred))
-#np.save(f'/home/ferreira/scratch/STAGE2_on_test1.npy', pred)
 
-    #    del model, model_extractor, all_preds
+    BASE_FOLDER = '/home/ferreira/scratch/runs/'
+    models_path = ['1078_B0_STAGE1_0', #1038_B0_STAGE1_0', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_0_202309041700',
+                    '1081_B0_STAGE1_1',
+                    '1082_B0_STAGE1_2', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_1_202309041721',
+                    '1082_B0_STAGE1_3', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_2_202309041737',
+                    '1083_B0_STAGE1_4', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_3_202309042315',
+                    '1083_B0_STAGE1_5', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_4_202309050005',
+                    '1083_B0_STAGE1_6', #'/home/ferreira/scratch/runs/1000_B0_STAGE1_5_202309050011',
+                    '1084_B0_STAGE1_7',#'/home/ferreira/scratch/runs/1000_B0_STAGE1_6_202309050011',
+                    '1084_B0_STAGE1_8',#'/home/ferreira/scratch/runs/1000_B0_STAGE1_7_202309050011',
+                    '1084_B0_STAGE1_9',#'/home/ferreira/scratch/runs/1000_B0_STAGE1_8_202309050011', 
+                    '1018_SwinV3_v2STAGE1_Ensemble_0',#'/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_0_202309051301',
+                    '1029_SwinV3_v2STAGE1_Ensemble_1',#'/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_1_202309041155',
+                    '1021_SwinV3_v2STAGE1_Ensemble_2',#'/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_2_202309041156',
+                    '1021_SwinV3_v2STAGE1_Ensemble_3',#'/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_3_202309041157',
+                    '1021_SwinV3_v2STAGE1_Ensemble_4',#'/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_4_202309041203',
+                    '1021_SwinV3_v2STAGE1_Ensemble_5',#'/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_5_202309041253',
+                    '1022_SwinV3_v2STAGE1_Ensemble_6',#'/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_6_202309041317',
+                    '1022_SwinV3_v2STAGE1_Ensemble_7',#'/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_7_202309041317',
+                    '1023_SwinV3_v2STAGE1_Ensemble_8',#'/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_8_202309041316',
+                    '1024_SwinV3_v2STAGE1_Ensemble_9']#,#'/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_9_202309051745']
+    """
+    models_path = ['/home/ferreira/scratch/runs/1000_B0_STAGE1_0_202309041700',
+                '/home/ferreira/scratch/runs/1000_B0_STAGE1_9_202309050017',
+                '/home/ferreira/scratch/runs/1000_B0_STAGE1_1_202309041721',
+                '/home/ferreira/scratch/runs/1000_B0_STAGE1_2_202309041737',
+                '/home/ferreira/scratch/runs/1000_B0_STAGE1_3_202309042315',
+                '/home/ferreira/scratch/runs/1000_B0_STAGE1_4_202309050005',
+                '/home/ferreira/scratch/runs/1000_B0_STAGE1_5_202309050011',
+                '/home/ferreira/scratch/runs/1000_B0_STAGE1_6_202309050011',
+                '/home/ferreira/scratch/runs/1000_B0_STAGE1_7_202309050011',
+                '/home/ferreira/scratch/runs/1000_B0_STAGE1_8_202309050011', 
+                '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_0_202309051301',
+                '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_1_202309041155',
+                '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_2_202309041156',
+                '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_3_202309041157',
+                '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_4_202309041203',
+                '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_5_202309041253',
+                '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_6_202309041317',
+                '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_7_202309041317',
+                '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_8_202309041316',
+                '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_9_202309051745']
+
+    models_path = [
+                '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_0_202309051301',
+                '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_1_202309041155',
+                '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_2_202309041156',
+                '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_3_202309041157',
+                '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_4_202309041203',
+                '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_5_202309041253',
+                '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_6_202309041317',
+                '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_7_202309041317',
+                '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_8_202309041316',
+                '/home/ferreira/scratch/runs/1000_SwinV3_STAGE1_Ensemble_9_202309051745']
+
+    """
+    models_path = models_path[10:]
+
+    #models_path = ['/home/ferreira/scratch/runs/1076_B0_STAGE1_0']
+    #models_path = ['/home/ferreira/scratch/runs/837_SwinV3_STAGE2_202308252303']
+
+
+
+    #dataset =  load_dataset('/home/ferreira/scratch/hierarchy_stage1/TNG2023_32/test/*.tfrecords', 1,  with_rootnames=False, batch_size=1024)
+    dataset =  load_dataset('/home/ferreira/projects/def-sellison/ferreira/CFISML/datasets/mock_survey/*.tfrecords', 1,  with_rootnames=False, batch_size=512)
+    #rootnames = tf.concat([ex[1] for ex in dataset], axis=0)
+    #np.save('/home/ferreira/scratch/mock_survey_rootnames.npy', rootnames)
+    #exit
+    models = []
+    rootnames = []
+
+    for i, model in enumerate(models_path):
+        mp = BASE_FOLDER + model
+        epoch = find_best_epoch(mp)
+        print(f'Evaluating {mp} at epoch {epoch}')
+        
+        all_preds =[]
+        
+        try:
+            config = yaml.safe_load(open(mp + '/config.yml')) 
+        except:
+            config = yaml.safe_load(open(mp + '/config.yaml')) 
+
+        strategy = tf.distribute.MirroredStrategy()
+        with strategy.scope():
+            model = get_model(config['modelName'], config['model'])
+        
+        
+        if epoch > 99:
+            model.load_weights(f'{mp}/checkpoints/{epoch}.ckpt').expect_partial()
+        else:
+            model.load_weights(f'{mp}/checkpoints/0{epoch}.ckpt').expect_partial() 
+
+        inputs = Input(shape=(256, 256, 1))
+        outputs = model.layers[0](inputs)
+        outputs = model.layers[1](outputs)
+        
+        model_extractor = Model(inputs=inputs, outputs=outputs)
+        #rootnames = [ex[1] for ex in dataset]
+        #for item in dataset:
+        #    pred = model_extractor.predict(dataset)
+        #    all_preds.append(pred) 
+        
+        pred = model_extractor.predict(dataset)
+        #print(pred.shape)
+        #models.append(pred)
+        
+        np.save(f'/home/ferreira/scratch/STAGE1_on_mock_realfeatures_{i+1}.npy', np.array(pred))
+        #np.save(f'/home/ferreira/scratch/STAGE2_on_test1.npy', pred)
+
+        #    del model, model_extractor, all_preds
 
 

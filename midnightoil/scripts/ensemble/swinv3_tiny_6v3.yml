@@ -1,0 +1,58 @@
+trainingPlan:
+    runName: 'ViT'
+    epochs: 10
+    initialEpoch: 0
+    batchSize: 1024
+    dataPath: TNG2023_32/train/CFIS_2023_train_stage1_6
+    evalPath: TNG2023_32/test/CFIS_2023_test_stage1_6
+    tfrecordsColumns: 'y'
+    optmization: false
+    distributed: false
+    train_size: 499512
+    test_size: 124880
+    from-epoch: 0
+
+learningRateScheduler:
+    scheduler: WarmUpCosine
+    warmupEpochs: 0
+    cycleEpochs: 200
+    lowerLR: 1.0e-6
+    upperLR: 1.0e-4
+
+modelName: 'SwinV3Config4'
+model:
+    name: 'SwinV3_v2STAGE1_Ensemble_6'
+    include_top: true
+    input_size: [256, 256]
+    patch_size: 4
+    channels: 1
+    num_classes: 1
+    embed_dim: 24
+    window_size: 8
+    mlp_ratio: 4
+    qkv_bias: false
+    qk_scale: false
+    drop_rate: 0.1
+    attn_drop_rate: 0.0
+    drop_path_rate: 0.0
+    ape: false
+    patch_norm: true
+    depths: [2, 2, 4, 2]
+    num_heads: [3, 6, 12, 24]
+    classification: true
+
+augmentation:
+    num_layers: 1
+    flip: 0.7
+    rotate90: 0.7
+    rotate: 0.7
+    shear: 0.7
+    oclusion: 0.7
+    shift: 0.7
+    zoom: 0.7
+
+
+metrics: ['accuracy']
+optimizer: LionCA
+loss: 'binary_crossentropy'
+from-epoch: 0

@@ -74,3 +74,14 @@ def SwinV3Config3(config):
     model = models.Model(inputs=inputs, outputs=outputs)
 
     return model
+
+def SwinV3Config4(config):
+
+    inputs = layers.Input(shape=(256, 256, 1))
+    outputs = SwinTransformerTiny224(classes=2, window_size=16, include_top=False, depths=(2, 2, 4, 2), num_heads=(2, 2, 6, 6), embed_dim=config['embed_dim'], weights=None,
+                            swin_v2=True, input_shape=(256, 256, 1))(inputs)
+    outputs = layers.Flatten()(outputs)                        
+    outputs = layers.Dense(config['num_classes'], dtype='float32', activation='sigmoid')(outputs)
+    model = models.Model(inputs=inputs, outputs=outputs)
+
+    return model
